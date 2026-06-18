@@ -1,0 +1,1585 @@
+[
+  {
+    "source": "PW",
+    "source_num": 1,
+    "extra": false,
+    "type": "mc",
+    "question": "Model programowania SPMD (single program multiple data):",
+    "correct": [
+      "może być realizowany i w MPI, i w OpenMP",
+      "w standardowych środowiskach programowania jest ogólniejszy niż MPMD (każdy program MPMD można sprowadzić do SPMD)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "może być realizowany tylko na maszynach SIMD",
+      "zawsze polega na wzbogaceniu kodu sekwencyjnego dyrektywami kompilatora",
+      "wymaga, aby każda linijka kodu była wykonywana przez wszystkie procesy (wątki), tyle że pracujące na różnych danych"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 2,
+    "extra": false,
+    "type": "open",
+    "question": "Wypisz zależności pojawiające się w przykładowym kodzie: y += 4 * sin (i * 3.14); A [i] = 3 * x + z * y; z = x * y",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: nr linii nr liniizmiennatyp zależności 12YRAW 13YRAW 23ZWAR"
+  },
+  {
+    "source": "PW",
+    "source_num": 3,
+    "extra": false,
+    "type": "open",
+    "question": "Przeanalizuj zależności w przykładowym kodzie. Jeżeli w kodzie występuje określona zależność przenoszona w pętli wpisz obok typu zależności nazwę tablicy, której dotyczy; jeśli danej zależności nie ma w kodzie, wpisz kreskę: for (i = 1; i < N; ++i) { A [i] = D [i + 1] – C [i – 1]; D [i + 1] = 2 * D [i – 1]; }",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: zależności wyjścia (WAW): - anty-zależności (WAR): - zależności rzeczywiste (RAW):D"
+  },
+  {
+    "source": "PW",
+    "source_num": 4,
+    "extra": false,
+    "type": "mc",
+    "question": "Operacją komunikacji grupowej, która przekształca stan pamięci procesów: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {0, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0} w stan: P1 (rank = 0): a = {11, 12, 13},b = {21, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {22, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {23, 0, 0} Jest:",
+    "correct": [
+      "MPI_Scatter (a, 1, MPI_INT, b, 1, MPI_INT, 1, MPI_COMM_WORLD);"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "MPI_Gather (a, 1, MPI_INT, b, 1, MPI_INT, 1, MPI_COMM_WORLD);",
+      "MPI_Allgather (a, 1, MPI_INT, b, 1, MPI_INT, MPI_COMM_WORLD);",
+      "MPI_Alltoall (a, 1, MPI_INT, b, 1, MPI_INT, MPI_COMM_WORLD);",
+      "MPI_Reduce (a, b, 1, MPI_INT, MPI_MAX, 1, MPI_COMM_WORLD);",
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);",
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 5,
+    "extra": false,
+    "type": "open",
+    "question": "Stosując notację taką jak w poprzednim zadaniu i zakładając, że stan pamięci przed wykonaniem operacji był następujący: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {0, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0} zilustruj stan pamięci procesów po wykonaniu operacji: MPI_REDUCE (a, b, 2, MPI_INT, MPI_MIN, 1, MPI_COMM_WORLD);",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {11, 12, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0}"
+  },
+  {
+    "source": "PW",
+    "source_num": 6,
+    "extra": false,
+    "type": "mc",
+    "question": "Standardowe programy w stosunku do programu rozważanego w analizie Amdahla mają najczęściej:",
+    "correct": [
+      "większy udział części nie dającej się zrównoleglić",
+      "większy czas komunikacji",
+      "gorsze przyspieszenie obliczeń równoległych (dla dużych p)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "mniejszy udział części nie dającej się zrównoleglić",
+      "mniejszy czas komunikacji",
+      "lepsze przyspieszenie obliczeń równoległych (dla dużych p)"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 7,
+    "extra": false,
+    "type": "mc",
+    "question": "Sposób podziału iteracji równoległej pętli for pomiędzy wątki przy zastosowaniu klauzuli schedule (dynamic) oznacza, że:",
+    "correct": [
+      "przydział będzie dokonywany w trakcie działania programu",
+      "liczba iteracji przydzielanych poszczególnym wątkom może być różna",
+      "narzut związany z wykonaniem równoległym będzie duży",
+      "rozmiar porcji będzie równy 1"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "jeden wątek może dostać wszystkie iteracje",
+      "rozmiar porcji będzie zmienny (określany dynamicznie)",
+      "sposób podziału w ostateczności zależeć będzie od wartości odpowiedniej zmiennej środowiskowej"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 8,
+    "extra": false,
+    "type": "mc",
+    "question": "Klauzula firstprivate oznacza, że objęta nią zmienna:",
+    "correct": [
+      "będzie zmienną prywatną wątków, inicjalizowaną wartością sprzed rozpoczęcia wykonywania dyrektywy"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "będzie prywatna dla pierwszego wątku",
+      "będzie pierwszą zmienną prywatną wątków",
+      "będzie zmienną prywatną wątków inicjalizowaną jako pierwsza",
+      "będzie zmienną prywatną wątków, której wartość z pierwszego wątku zostanie skopiowana do wątku głównego po zakończeniu wykonywania dyrektywy"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 9,
+    "extra": false,
+    "type": "mc",
+    "question": "W analizie Gustafsona rozważa się zadania, których czas rozwiązania programem równoległym przy rosnącej liczbie procesorów jest stały, albowiem:",
+    "correct": [
+      "rozmiar zadania rośnie wraz z liczbą procesorów (rośnie więc czas rozwiązania na jednym procesorze)",
+      "udział procentowy części sekwencyjnej w czasie rozwiązania na jednym procesorze maleje wraz ze wzrostem rozmiaru zadania"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "czas komunikacji rośnie wolniej niż czas obliczeń",
+      "część równoległa osiąga przyspieszenie ponadliniowe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 13,
+    "extra": false,
+    "type": "open",
+    "question": "Kod: #pragma omp parallel num_threads (4) #pragma omp for schedule (static, 3) for (i = 0l i < 15; ++i) {...} powoduje rozdzielenie iteracji równoległej pętli for pomiędzy wątki w następujący sposób (napisać jak)",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: W0: 0, 1, 2, 12, 13, 14 W1: 3, 4, 5 W2: 6, 7, 8 W3: 9, 10, 11"
+  },
+  {
+    "source": "PW",
+    "source_num": 14,
+    "extra": false,
+    "type": "mc",
+    "question": "Monitor w programowaniu współbieżnym:",
+    "correct": [
+      "jest strukturą danych gwarantującą wzajemne wykluczanie przy realizacji jego procedur",
+      "jest jednym z mechanizmów wbudowanych w model obiektów Javy"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "jest strukturą danych zawierającą informacje o sekcjach krytycznych",
+      "służy do monitorowania ewentualnych konfliktów wątków w dostępie do pamięci wspólnej",
+      "jest jednym z mechanizmów wbudowanych w model muteksów pthreads"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 18,
+    "extra": false,
+    "type": "open",
+    "question": "Jakie będą wartości zmiennych a, b i c w dowolnym wątku po wykonaniu następującego fragmentu kodu (wciąż wewnątrz obszaru równoległego) (jeśli nie wiadomo wstaw „?”)? int a = 3 , int b = 1 , int c = 2; #pragma omp parallel firstprivate (c) num_threads (4) { int b = a + c; #pragma omp barrier #pragma omp atomic c += 1; a += 2; b += 3; }",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: a = ?, b = 8, c= 3"
+  },
+  {
+    "source": "PW",
+    "source_num": 19,
+    "extra": false,
+    "type": "mc",
+    "question": "Operacją komunikacji grupowej, która przekształca stan pamięci procesów: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {0, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0} w stan: P1 (rank = 0): a = {11, 12, 13},b = {11, 21, 31} P2 (rank = 1): a = {21, 22, 23},b = {11, 21, 31} P3 (rank = 2): a = {31, 32, 33},b = {11, 21, 31} Jest:",
+    "correct": [
+      "MPI_Allgather (a, 1, MPI_INT, b, 1, MPI_INT, MPI_COMM_WORLD);"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "MPI_Gather (a, 1, MPI_INT, b, 1, MPI_INT, 1, MPI_COMM_WORLD);",
+      "MPI_Scatter (a, 1, MPI_INT, b, 1, MPI_INT, 1, MPI_COMM_WORLD);",
+      "MPI_Alltoall (a, 1, MPI_INT, b, 1, MPI_INT, MPI_COMM_WORLD);",
+      "MPI_Reduce (a, b, 1, MPI_INT, MPI_MAX, 1, MPI_COMM_WORLD);",
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);",
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 20,
+    "extra": false,
+    "type": "open",
+    "question": "Stosując notację taką jak w poprzednim zadaniu i zakładając, że stan pamięci przed wykonaniem operacji był następujący: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {0, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0} zilustruj stan pamięci procesów po wykonaniu operacji: MPI_Reduce (a, b, 1, MPI_INT, MPI_MAX, 1, MPI_COMM_WORLD);",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: P1 (rank = 0): a = {11, 12, 13},b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23},b = {31, 0, 0} P3 (rank = 2): a = {31, 32, 33},b = {0, 0, 0}"
+  },
+  {
+    "source": "PW",
+    "source_num": 21,
+    "extra": false,
+    "type": "open",
+    "question": "Kod: #pragma omp parallel num_threads (3) #pragma omp for schedule (static, 4) for (i = 0l i < 15; ++i) {...} powoduje rozdzielenie iteracji równoległej pętli for pomiędzy wątki w następujący sposób (wypisać):",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: W0:0,1,2,3, 12,13,14 W1:4,5,6,7 W2: 8, 9, 10, 11"
+  },
+  {
+    "source": "PW",
+    "source_num": 22,
+    "extra": false,
+    "type": "open",
+    "question": "Jakie będą wartości zmiennych a, b i c w dowolnym wątku po wykonaniu następującego fragmentu kodu (wciąż wewnątrz obszaru równoległego) (jeśli nie wiadomo wstaw „?”)? int a = 2, int b = 3, int c = 4; #pragma omp parallel firstprivate (a) num_threads (4) { int b = a + c; #pragma omp barrier #pragma omp atomic c += 1; a += 2; b += 3; }",
+    "correct": [],
+    "uncertain": [],
+    "uncertain_open": false,
+    "explanation": "Odpowiedź: a = 4, b = 9, c = ?"
+  },
+  {
+    "source": "PW",
+    "source_num": 23,
+    "extra": false,
+    "type": "mc",
+    "question": "W wyniku wykonania procedury systemowej fork powstają dwa procesy realizujące ten sam kod, które:",
+    "correct": [
+      "pełnią różne role: jeden jest procesem nadrzędnym, drugi potomnym",
+      "proces nadrzędny może synchronizować swoje działanie z działaniem procesu potomnego"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "posiadają wspólne zmienne globalne",
+      "posiadają wspólne zmienne lokalne",
+      "otrzymują jako wartość zwracaną funkcji fork nazwajem swoje identyfikatory",
+      "są w pełnie niezależne i nie mogą być synchronizowane"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 24,
+    "extra": false,
+    "type": "mc",
+    "question": "Przetwarzanie w przeplocie oznacza sytuację kiedy:",
+    "correct": [
+      "system operacyjny realizuje przetwarzanie współbieżne na jednym procesorze (rdzeniu)",
+      "procesor(rdzeń) stosuje tzw. simultaneous multithreading",
+      "pojedynczy procesor (rdzeń) na przemian wykonuje fragmenty wielu wątków"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "system operacyjny przydziela wątki tego samego zadania różnym rdzeniom (procesom)",
+      "pojedynczy proces korzysta na przemian z wielu rdzeni"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 25,
+    "extra": false,
+    "type": "mc",
+    "question": "Argumentami procedury tworzenia nowego wątku pthread_create są m.in.:",
+    "correct": [
+      "nazwa funkcji, którą zacznie wykonywać wątek – funkcji startowej wątku (będąca w rzeczywistości wskaźnikiem do funkcji)",
+      "obiekt określający atrybuty (m. in. sposób funkcjonowania) wątku",
+      "argument dla funkcji startowej wątku będący wskaźnikiem"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "rozmiar stosu przydzielonego wątkowi",
+      "zadany przez użytkownika identyfikator wątku"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 26,
+    "extra": false,
+    "type": "mc",
+    "question": "Cechami charakterystycznymi funkcjonowania wątków Pthreads są m.in.",
+    "correct": [
+      "konieczność używania jako funkcji startowej wątków, funkcji o tylko jednym argumencie"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "istnienie odrębnych funkcji tworzenia i uruchamiania wątków",
+      "brak możliwości zmiany domyślnego sposobu funkcjonowania wątków w trakcie ich tworzenia",
+      "posługiwanie się identyfikatorami wątków tożsamymi z identyfikatorami z systemu operacyjnego"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 27,
+    "extra": false,
+    "type": "mc",
+    "question": "Każdy wątek Pthreads posiada własne, niezależne od innych wątków:",
+    "correct": [
+      "zestaw rejestrów",
+      "własny stos",
+      "ciąg rozkazów"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "przestrzeń adresową"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 28,
+    "extra": false,
+    "type": "mc",
+    "question": "Przyspieszenie równoległe programu rozwiązującego pewien problem jako funkcję liczby procesorów p można zdefiniować jako stosunek:",
+    "correct": [
+      "czasu rozwiązania problemu najlepszym programem sekwencyjnym do czasu rozwiązania problemu rozważanym programem na p procesorach"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "czasu rozwiązania problemu najlepszym programem sekwencyjnym do czasu rozwiązania problemu p-razy większego rozważanym programem na p procesorach",
+      "czasu pracy jednego procesora przy rozwiązaniu problemu rozważanym programem na p procesorach do czasu pracy na wszystkich procesorach"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 29,
+    "extra": false,
+    "type": "mc",
+    "question": "Liniowe (idealne) przyspieszenie obliczeń równoległych można scharakteryzować jako:",
+    "correct": [
+      "przyspieszenie w sytuacji gdy czas obliczeń równoległych na p procesorach jest p razy krótszy niż czas obliczeń sekwencyjnych"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "nie dającego się nigdy przewyższyć",
+      "przewidywane przez analizę Amdhala"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 30,
+    "extra": false,
+    "type": "mc",
+    "question": "Przyspieszenie programu rozważanego w analize Amdhala ulega nasyceniu (przestaje rosnąć) mimo zwiększajacej się liczby procesów ponieważ program:",
+    "correct": [
+      "posiada część sekwencyjną, którą zawsze musi wykonać tylko jeden proces (wątek)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "ma rozmiar rosnący wraz z liczbą procesorów",
+      "wykazuje duży narzut na komunikację"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 31,
+    "extra": false,
+    "type": "mc",
+    "question": "Błedne założenie (w stosunku do praktyki stosowania rzeczywistych programów równoległych) w ramach analizy Amdhala polega na rozważaniu:",
+    "correct": [
+      "zadań o stałym rozmiarze przy rosnącej liczbie procesorów"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "zbyt dużej liczbie procesorów",
+      "zadań zbyt trudnych do zrównoleglenia"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 35,
+    "extra": false,
+    "type": "mc",
+    "question": "Procesory wielordzeniowe:",
+    "correct": [
+      "są nazywane inaczej układami scalonymi wieloprocesorowymi"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "pracują w modelu SIMD (single instruction multiple data)",
+      "nigdy nie przekroczą liczby rdzeni ok. kilkunastu",
+      "nie posiadają pamięci podręcznej L2 i L3",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 37,
+    "extra": false,
+    "type": "mc",
+    "question": "Klastry:",
+    "correct": [
+      "powstają przez połączenie wielu komputerów siecią i wyposażenie ich w specjalne oprogramowanie pozwalające traktować je jak pojedynczy system do uruchamiania programów",
+      "zakładają najczęściej model programowania bez pamięci wspólnej",
+      "skalują się (dają się praktycznie wykorzystywać) dla liczb procesorów (rdzeni) do rzędu kilku dziesięciu"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "są specjalistycznymi superkomputerami",
+      "są najdroższymi komputerami równoległymi",
+      "skalują się (dają się praktycznie wykorzystywać) dla liczb procesorów (rdzeni) do rzędu kilku tysięcy",
+      "skalują się (dają się praktycznie wykorzystywać) dla liczb procesorów (rdzeni) do rzędu kilkuset tysięcy"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 38,
+    "extra": false,
+    "type": "mc",
+    "question": "Klastry realizują model przetwarzania:",
+    "correct": [
+      "MIMD",
+      "MPMD"
+    ],
+    "uncertain": [
+      "MPMD"
+    ],
+    "wrong": [
+      "MISD",
+      "SISD",
+      "SIMD",
+      "eSPMD"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 40,
+    "extra": false,
+    "type": "mc",
+    "question": "Potokowe przetwarzanie rozkazów oznacza przetwarzanie:",
+    "correct": [
+      "zbliżone do pracy na taśmie produkcyjnej – pojedyncza jednostka funkcjonalna procesora realizuje tylko część przetwarzania rozkazu",
+      "dzięki któremu procesor może współbieżnie przetwarzać wiele rozkazów",
+      "wymagające istnienia złożonych procesorów o wielu jednostkach funkcjonalnych"
+    ],
+    "uncertain": [
+      "wymagające istnienia złożonych procesorów o wielu jednostkach funkcjonalnych"
+    ],
+    "wrong": [
+      "potoku rozkazów – kolejny rozkaz po zakończeniu poprzedniego",
+      "takie jak w kartach graficznych (inaczej przetwarzanie strumieniowe)"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 46,
+    "extra": false,
+    "type": "mc",
+    "question": "Wskaż prawidłową kolejność etapów przetwarzania potokowego (ID – dekodowanie rozkazu, IE – wykonanie rozkazu, IF – pobranie rozkazu, OF – pobranie argumentów, WB – zapis wyniku):",
+    "correct": [
+      "IF ID OF IE WB"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "IE ID OF IF WB",
+      "ID IF WB IE OF",
+      "IE IF WB ID OF",
+      "WB IE IF ID OF"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 48,
+    "extra": false,
+    "type": "mc",
+    "question": "Na stosie w trakcie realizacji programu przechowywane są:",
+    "correct": [
+      "dane programu",
+      "dane wejściowe (argumenty) procedur",
+      "dane prywatne (lokalne) procedur",
+      "dane wspólne procedur"
+    ],
+    "uncertain": [
+      "dane wspólne procedur"
+    ],
+    "wrong": [
+      "dane do komunikacji procedur z systemem operacyjnym",
+      "dane do komunikacji międzyprocesowej"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 49,
+    "extra": false,
+    "type": "mc",
+    "question": "Współbieżność wykonania programów P1 i P2 oznacza:",
+    "correct": [
+      "nakładanie się czasów wykonania (możliwe wykonanie w przeplocie na jednym procesorze)",
+      "konieczność zarządzania przez system operacyjny dostępem do urządzeń wejścia/wyjścia przez P1 i P2"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "wykonanie równoległe (wymaga systemu wieloprocesorowego)",
+      "posiadanie wspólnej przestrzeni adresowej przez P1 i P2",
+      "żadne z powyższych stwierdzeń nie jest prawdziwe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 50,
+    "extra": false,
+    "type": "mc",
+    "question": "Współbieżność wykonania programów wprowadzona została w celu:",
+    "correct": [
+      "usprawnienia pracy komputera przy realizacji operacji wejścia/wyjścia",
+      "szybszej obsługi połączeń sieciowych",
+      "umożliwienia funkcjonowania procesów wielowątkowych"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "umożliwienia działania procesorów wielordzeniowych",
+      "żadne z powyższych stwierdzeń nie jest prawdziwe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 51,
+    "extra": false,
+    "type": "mc",
+    "question": "Proces od wątku różni się m.in.:",
+    "correct": [
+      "posiadaniem własnej przestrzeni adresowej (wątek współdzieli przestrzeń adresową z innymi wątkami tego samego procesu)",
+      "posiadaniem bardziej rozbudowanej struktury umożliwiającej zarządzanie przez system operacyjny"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "posiadaniem własnego zestawu rejestrów w trakcie wykonania (wątek współdzieli rejestry z innymi wątkami tego samego procesu)",
+      "posiadaniem wyższego priorytetu wykonania",
+      "żadne z powyższych stwierdzeń nie jest prawdziwe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 52,
+    "extra": false,
+    "type": "mc",
+    "question": "W skład narzędzi programowania OpenMP wchodzą:",
+    "correct": [
+      "dyrektywy kompilatora",
+      "funkcje biblioteczne",
+      "zmienne środowiskowe"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "predefiniowane obiekty (struktury)",
+      "typy danych",
+      "żadna odpowiedź nie jest prawidłowaamdh"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 53,
+    "extra": false,
+    "type": "mc",
+    "question": "W trakcie wykonania programu OpenMP obszar równoległy:",
+    "correct": [
+      "zaczyna się po dyrektywie parallel",
+      "oznacza, że program może być wykonywany wielowątkowo (w przeciwieństwie do obszaru sekwencyjnego)",
+      "oznacza, że zmienne prywatne funkcjonują w wielu kopiach (po jednej dla każdego wątku)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "zaczyna się po dowolnej dyrektywie podziału pracy",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 54,
+    "extra": false,
+    "type": "mc",
+    "question": "Liczba wątków tworzonych przy wchodzeniu do obszaru równoległego może (jeśli system pozwala) zostać jawnie określona za pomocą:",
+    "correct": [
+      "klauzuli num_threads dyrektywy parallel",
+      "procedury omp_set_num_threads przed wejściem do obszaru równoległego",
+      "zmiennej środowiskowej OMP_NUM_THREADS ustawianej przed uruchomieniem programu"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "klauzuli num_threads dowolnej dyrektywy podziału pracy",
+      "procedury omp_set_num_threads wewnątrz obszaru równoległego",
+      "zmiennej środowiskowej OMP_NUM_THREADS ustawianej przed wejściem przez program do obszaru równoległego",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 55,
+    "extra": false,
+    "type": "mc",
+    "question": "Zmiana wartości zmiennej wspólnej w OpenMP:",
+    "correct": [
+      "może, a czasami powinna odbywać się w sekcji krytycznej",
+      "może być dokonana przez dowolny wątek w obszarze równoległym",
+      "może zostać zrealizowana niepodzielnie (dyrektywa atomic)",
+      "dokonana przez jeden wątek jest widoczna dla wszystkich wątków"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "musi odbywać się w sekcji krytycznej",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 56,
+    "extra": false,
+    "type": "mc",
+    "question": "Zmiana wartości zmiennej prywatnej w OpenMP:",
+    "correct": [
+      "może być dokonana przez dowolny wątek w obszarze równoległym",
+      "może zostać zrealizowana niepodzielnie (dyrektywa atomic)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "musi odbywać się w sekcji krytycznej",
+      "powinna odbywać się w sekcji krytycznej",
+      "dokonana przez jeden wątek jest widoczna dla wszystkich wątków",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 57,
+    "extra": false,
+    "type": "mc",
+    "question": "Zmienna lokalna funkcji staje się zmienną prywatną wątków w obszarze równoległym jeśli w kodzie:",
+    "correct": [
+      "jest objęta dyrektywą threadprivate w tej samej funkcji, w której znajduje się dyrektywa parallel",
+      "jest zmienną sterującą równoległej pętli for",
+      "jest objęta jedną z klauzul private, firstprivate itp. w dyrektywie parallel danego obszaru równoległego",
+      "jest objęta jedną z klauzul private, firstprivate itp. w dyrektywie parallel danego obszaru równoległego w danej funkcji"
+    ],
+    "uncertain": [
+      "jest objęta jedną z klauzul private, firstprivate itp. w dyrektywie parallel danego obszaru równoległego",
+      "jest objęta jedną z klauzul private, firstprivate itp. w dyrektywie parallel danego obszaru równoległego w danej funkcji"
+    ],
+    "wrong": [
+      "jest objęta dyrektywą threadprivate w dowolnej funkcji",
+      "jest zmienną sterującą pętli for",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 58,
+    "extra": false,
+    "type": "mc",
+    "question": "Zakończenie operacji wysyłania danych procedurą MPI_Send (powrót z procedury) lub MPI_Isend (np. powrót z procedury MPI_Wait) oznacza zawsze, że:",
+    "correct": [
+      "obszary danych objęte poleceniem wysyłania mogą być zmieniane, co nie spowoduje zmiany zawartości komunikatu"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "dane dotarły do adresata",
+      "system odnalazł adresata gotowego do odebrania komunikatu (adresata, który wywołał procedurę MPI_Recv z pasującymi argumentami)",
+      "system skopiował dane do wewnętrznego bufora przesyłania danych",
+      "system potwierdził rozpoczęcie operacji przesyłania danych",
+      "żadna z powyższych odpowiedzi nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 59,
+    "extra": false,
+    "type": "mc",
+    "question": "Po powrocie z procedury odbierania nieblokującego MPI_Irecv( &a, ......... &req), gdzie a oznacza pewną zmienną, mamy pewność, że wartość a jest wartością otrzymaną w komunikacie P:",
+    "correct": [
+      "dopiero po powrocie z procedury MPI_Wait (& req, & stat)",
+      "dopiero po powrocie z procedury MPI_Test (& req, & flag, & stat)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "od razu",
+      "dopiero po sprawdzeniu zawartości obiektu req (type MPI_Request)",
+      "dopiero po powrocie z procedury MPI_Wait (& req, & stat) i sprawdzeniu odpowiedniej zmiany wartości obiektu stat",
+      "dopiero po powrocie z procedury MPI_Test (& req, & flag, & stat) i sprawdzeniu odpowiedniej zmiany wartości obiektu stat",
+      "dopiero po powrocie z procedury MPI_Test (& req, & flag, & stat) i sprawdzeniu odpowiedniej zmiany wartości zmiennej flag",
+      "żadna z powyższych odpowiedzi nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 60,
+    "extra": false,
+    "type": "mc",
+    "question": "Komunikator w MPI:",
+    "correct": [
+      "jest konieczny do realizacji dowolnego przesyłania komunikatów",
+      "oznacza grupę procesów i związane z nią informacje umożliwiające wymianę komunikatów",
+      "jest co najmniej jeden w programie; jeśli jeden, to jest to MPI_COMM_WORLD",
+      "jest co najmniej jeden w programie, zawsze typu MPI_Comm"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "jest konieczny tylko do przeprowadzenia komunikacji grupowej",
+      "oznacza proces pośredniczący w wymianie komunikatów",
+      "jest reprezentowany zawsze przez obiekt MPI_COMM_WORLD",
+      "jest zawsze tylko jeden w programie",
+      "żadne z powyższych twierdzeń nie jest prawdziwe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 61,
+    "extra": false,
+    "type": "mc",
+    "question": "Zakładając początkowy stan zmiennych w kolejnych procesach w postaci: P1 (rank = 0), a = {11, 12, 13}, b = {0, 0, 0} P2 (rank = 1), a = {21, 22, 23}, b = {0, 0, 0} P3 (rank = 2), a = {31, 32, 33}, b = {0, 0, 0} operacja MPI_Scatter (a, 1, MPI_INT, b, 1, MPI_INT, 2, MPI_COMM_WORLD); prowadzi do stanu zmiennej b:",
+    "correct": [
+      "P1: {31, 0, 0}, P2: {32, 0, 0}, P3: {33, 0, 0}"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "P1: {11, 12, 13}, P2: {21, 22, 23}, P3: {31, 32, 33}",
+      "P1: {11, 12, 13}, P2: {11, 12, 13}, P3: {11, 12, 13}",
+      "P1: {31, 32, 33}, P2: {31, 32, 33}, P3: {31, 32, 33}",
+      "P1: {11, 0, 0}, P2: {12, 0, 0}, P3: {13, 0, 0}",
+      "P1: {11, 12, 13}, P2: {12, 0, 0}, P3: {13, 0, 0}",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 62,
+    "extra": false,
+    "type": "mc",
+    "question": "Operacją komunikacji grupowej, która przekształca stan pamięci procesów: P1 (rank = 0): a = {11, 12, 13}, b = {0, 0, 0} P2 (rank = 1): a = {21, 22, 23}, b = {0, 0, 0} P3 (rank = 2): a = {31, 32, 33}, b = {0, 0, 0} w stan P1 (rank = 0): a = {11, 12, 13}, b = {31, 0, 0} P2 (rank = 1): a = {21, 22, 23}, b = {31, 0, 0} P3 (rank = 2): a = {31, 32, 33}, b = {31, 0, 0} jest:",
+    "correct": [
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD); (!)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "MPI_Gather (a, 1, MPI_INT, b, 1, MPI_INT, 2, MPI_COMM_WORLD);",
+      "MPI_Allgather (a, 1, MPI_INT, b, 1, MPI_INT, 2, MPI_COMM_WORLD);",
+      "MPI_Scatter (a, 1, MPI_INT, b, 1, MPI_INT, 2, MPI_COMM_WORLD);",
+      "MPI_Alltoall (a, 1, MPI_INT, b, 1, MPI_INT, MPI_COMM_WORLD);",
+      "MPI_Reduce (a, b, 1, MPI_INT, MPI_SUM, 2, MPI_COMM_WORLD);",
+      "MPI_Allreduce (a, b, 1, MPI_INT, MPI_SUM, MPICOMM_WORLD);"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 63,
+    "extra": false,
+    "type": "mc",
+    "question": "Jakie będą wartości zmiennych a, b i c po wykonaniu następującego fragmentu kodu: int a = 1; int b = 2; int c = 4; #pragma omp threadprivate b #pragma omp parallel firstprivate(c) num_threads(4) { int d = a + c; #pragma omp atomic c += 1; #pragma omp atomic a += 2; #pragma omp atomic d += 3; b = d; }",
+    "correct": [
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "a = 3, b = 8, c = 4",
+      "a = 3, b = 8, c = 5",
+      "a = 3, b = 8, c = 5",
+      "a = 3, b = 8, c = 8",
+      "a = 9, b = 8, c = 4",
+      "a = 9, b = 8, c = 5",
+      "a = 9, b = 8, c = 8",
+      "a = 3, b = 17, c = 4",
+      "a = 3, b = 17, c = 5",
+      "a = 3, b = 17, c = 8",
+      "a = 9, b = 17, c = 4",
+      "a = 9, b = 17, c = 5",
+      "a = 9, b = 17, c = 8"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 64,
+    "extra": false,
+    "type": "mc",
+    "question": "Jakie wartości zmiennych a, b i c zostaną wypisane przez polecenie printf po wykonaniu następującego fragmentu kodu: int a = 1; int b = 2; int c = 3; #pragma omp threadprivate(b) #pragma omp parallel firstprivate (a) num_threads (4) { int d = a + c; #pragma omp atomic c += 1; #pragma omp atomic a += 2; #pragma omp atomic d += 3; b = d; printf (“a = %d, b = %d, c = %d\\n”, a, b, c); }",
+    "correct": [
+      "żadna odpowiedź nie jest prawdłowa"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "a = 9, b = 16, c = 4",
+      "a = 9, b = 16, c = 7",
+      "a = 9, b = 7, c = 4",
+      "a = 9, b = 7, c = 7",
+      "a = 9, b = 16, c = 4"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 65,
+    "extra": false,
+    "type": "mc",
+    "question": "Jakie wartości zmiennych a, b i c zostaną wypisane przez polecenie printf po wykonaniu następującego fragmentu kodu: int a = 1; int b = 2; int c = 3; #pragma omp threadprivate (b) #pragma omp parallel firstprivate (c) num_threads (4) { int d = a + c; #pragma omp atomic c += 1; #pragma omp atomic a += 2; #pragma omp atomic d += 3; b =d; printf (“a = %d, b = %d, c = %d\\n”, a, b, c); }",
+    "correct": [
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "a = 3, b = 16, c = 7;",
+      "a = 3, b = 16, c = 4;",
+      "a = 9, b = 7, c = 7;",
+      "a = 9, b = 7, c = 4;",
+      "a = 9, b = 7, c = 7;"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 66,
+    "extra": false,
+    "type": "mc",
+    "question": "Jakie będą wartości zmiennych a, b i c po wykonaniu następującego fragmentu kodu: int a = 1, int b = 2, int c = 3; #pragma omp threadprivate (b) #pragma omp parallel firstprivate (c) num_threads (4) { int d = a + c; #pragma omp atomic c += 1; #pragma omp atomic a += 2; #pragma omp atomic d += 3; b = d; }",
+    "correct": [
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "a = 3, b = 7, c = 3",
+      "a = 3, b = 7, c = 4",
+      "a = 3, b = 7, c = 7",
+      "a = 9, b = 7, c = 3",
+      "a = 9, b = 7, c = 4",
+      "a = 9, b = 7, c = 7",
+      "a = 3, b = 16, c = 3",
+      "a = 3, b = 16, c = 4",
+      "a = 3, b = 16, c = 7",
+      "a = 9, b = 16, c = 3",
+      "a = 9, b = 16, c = 4",
+      "a = 9, b = 16, c = 7"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 67,
+    "extra": false,
+    "type": "mc",
+    "question": "Kod: #pragma omp parallel for schedule (static, 3) for (i = 0; i < 13; ++i) {...} powoduje rozdzielenie iteracji równoległej pętli for pomiędzy 3 wątki (W1, W2, W3) wykonujące program w następujący sposób:",
+    "correct": [
+      "W1 – 0, 1, 2, 9, 10, 11; W2 – 3, 4, 5, 12; W3 – 6, 7, 8"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "W1 – 0, 3, 6, 9, 12; W2 – 1, 4, 7, 10; W3 – 2, 5, 8, 11",
+      "W1 – 0, 1, 6, 7, 12; W2 – 2, 3, 8, 9; W3 – 4, 5, 10, 11",
+      "W1 – 0, 1, 2, 9, 10; W2 – 3, 4, 5, 11; W3 – 5, 7, 8, 12",
+      "W1 – 0, 1, 2, 3, 4; W2 – 5, 6, 7, 8, 9; W3 – 10, 11, 12"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 68,
+    "extra": false,
+    "type": "mc",
+    "question": "Kod: #pragma omp parallel for schedule (static, 2) for (i = 0; i < 13; ++i) {...} powoduje rozdzielenie iteracji równoległej pętli for pomiędzy 3 wątki (W1, W2, W3) wykonujące program w następujący sposób:",
+    "correct": [
+      "W1 – 0, 1, 6, 7, 12; W2 – 2, 3, 8, 9; W3 – 4, 5, 10, 11;"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "W1 – 0, 3, 6, 9, 12; W2 – 1, 4, 7, 10; W3 – 2, 5, 8, 11;",
+      "W1 – 0, 1, 2, 9, 10, 11; W2 – 3, 4, 5, 12; W3 – 6, 7, 8;",
+      "W1 – 0, 1, 2, 9, 10; W2 – 3, 4, 5, 11; W3 – 6, 7, 8, 12;",
+      "W1 – 0, 1, 2, 3, 4; W2 – 5, 6, 7, 8, 9; W3 – 10, 11, 12;"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 69,
+    "extra": false,
+    "type": "mc",
+    "question": "Jakie zależności występują w poniższym kodzie (pominięto inicjalizowanie zmiennych): for (i = 2; i < N; ++i) { A [i] = B [i + 1] - C [i - 2]; A [i + 2] = 2 * D [i - 1]; }",
+    "correct": [
+      "występują zaleności wyjścia(WAW) przenoszone w pętli"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "występują zależności wyjścia (WAW)",
+      "występują anty-zależności (WAR)",
+      "występują zależności rzeczywiste (RAW)",
+      "występują anty-zależności (WAR) przenoszone w pętli",
+      "występują zależności rzeczywiste (RAW) przenoszone w pętli"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 70,
+    "extra": false,
+    "type": "mc",
+    "question": "W przykładowym kodzie (pominięte inicjowanie zmiennych): for (i = 0; i < N; ++i) { A [i] =B [i + 1] – C [i - 2]; D [i + 2] = 2 * A [i - 1]; }",
+    "correct": [
+      "występują zależności rzeczywiste (RAW) przenoszone w pętli"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "występują zależności wyjścia (WAW)",
+      "występują anty-zależności (WAR)",
+      "występują zależności rzeczywiste (RAW)",
+      "występują zależności wyjścia (WAW) przenoszone w pętli",
+      "występują anty-zależności (WAR) przenoszone w pętli",
+      "nie ma zależności"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 71,
+    "extra": false,
+    "type": "mc",
+    "question": "W przykładowym kodzie (pominięto inicjalizowanie zmiennych) for (i = 0; i < N; ++i) { x += 2 * y + z; A [i] = 3 * x + w * y; y = 4 * i; }",
+    "correct": [
+      "występują anty-zależności (WAR)",
+      "występują zależności rzeczywiste (RAW)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "występują zależności wyjścia (WAW)",
+      "występują zależności wyjścia (WAW) przenoszone w pętli",
+      "występują anty-zależności (WAR) przenoszone w pętli",
+      "występują zależności rzeczywiste (RAW) przenoszone w pętli",
+      "nie ma zależności"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 72,
+    "extra": false,
+    "type": "mc",
+    "question": "Umieszczenie jakiej pętli w połączeniu ze zmianą jednej z linijek kodu wewnątrz pętli usuwa zależność przenoszoną w następującej pętli (pominięte szczegóły na początku i końcu pętli): for (i = 0; i < N; ++i) { A [i] = B [i + 1] - C [i - 1]; D [i] = A [i]; }",
+    "correct": [
+      "w pętli jest zależność nieusuwalna",
+      "w pętli nie ma żadnej przenoszonej zależności"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaE [i] = B [i + 1] - C [i - 1];",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i + 1] = E [i + 1]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; *+oraz zmianaD [i + 1] = E [i]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i + 1] = E [i - 1]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i] = E [i]"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 73,
+    "extra": false,
+    "type": "mc",
+    "question": "Umieszczenie jakiej pętli w połączeniu ze zmianą jednej z linijek kodu wewnątrz pętli usuwa zależność przenoszoną w następującej pętli (pominięte szczegóły na początku i na końcu pętli): for (i = 0; i < N; ++i) { A [i] = B [i + 1] – C [i - 1]; D [i + 1] = 2 * A [i - 1]; }",
+    "correct": [
+      "w pętli jest zależność nieusuwalna"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaE [i] = B [i + 1] - C [i - 1];",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i + 1] = E [i + 1]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i + 1] = E [i]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i + 1] = E [i - 1]",
+      "for (i = 0; i < N; ++i) E [i] = A [i]; oraz zmianaD [i] = E [i]",
+      "w pętli nie ma żadnej przenoszonej zależności"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 84,
+    "extra": false,
+    "type": "mc",
+    "question": "Przyspieszenie programu rozważanego w analizie Amdahla ulega nasyceniu (przestaje rosnąć) mimo zwiększającej się liczby procesorów ponieważ program:",
+    "correct": [
+      "posiada część sekwencyjną, którą zawsze musi wykonywać tylko jeden proces (wątek)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "ma rozmiar rosnący wraz z liczbą procesorów",
+      "wykazuje duży narzut na komunikację"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 85,
+    "extra": false,
+    "type": "mc",
+    "question": "Błędne założenie (w stosunku do praktyki stosowania rzeczywistych programów równoległych) w ramach analizy Amdahla polega na rozważaniu:",
+    "correct": [
+      "zadań o stałym rozmiarze przy rosnącej liczbie procesorów"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "zbyt dużej liczby procesorów",
+      "zadań zbyt trudnych do zrównoleglenia"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 86,
+    "extra": false,
+    "type": "mc",
+    "question": "W analizie Gustaffsona rozważa się zadania w których rozmiar rośnie wraz z liczbą procesorów ale czas rozwiązania programem równoległym na p procesorach jest stały albowiem zakłada się że:",
+    "correct": [
+      "udział procentowy części sekwencyjnej w czasie rozwiązania na jednym procesorze maleje wraz z wzrostem rozmiaru zadania"
+    ],
+    "uncertain": [
+      "udział procentowy części sekwencyjnej w czasie rozwiązania na jednym procesorze maleje wraz z wzrostem rozmiaru zadania"
+    ],
+    "wrong": [
+      "czas komunikacji rośnie wolniej niż czas obliczeń",
+      "część równoległa osiąga przyspieszenie ponadliniowe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 87,
+    "extra": false,
+    "type": "mc",
+    "question": "W analizie Amdahla rozważa się zrównoleglenie programu:",
+    "correct": [
+      "którego czas wykonania sekwencyjnego jest równy sumie czasu wykonania części sekwencyjnej i części dającej się zrównoleglić",
+      "który posiada część, którą zawsze musi wykonywać jeden proces (wątek)",
+      "który posiada część dającą się zrównoleglić idealnie",
+      "który daje się wydajniej (efektywniej) zrównoleglić niż zdecydowana większość programów rzeczywistych"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "którego sekwencyjny czas rozwiązania problemu jest najkrótszy z możliwych",
+      "który posiada część dającą się zrównoleglić z idealną komunikacją"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 88,
+    "extra": false,
+    "type": "mc",
+    "question": "W analizie Amdahla graniczną wartość przyspieszenia obliczeń , której nie może przekroczy program o czasie wykonywania T(p) = s+r/p jest (w poniższych wzorach f oznacza t.zw. udział części sekwencyjnej f = s/(s+r))",
+    "correct": [
+      "1/f"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "f",
+      "1+f",
+      "1+ 1/f",
+      "1/(1+f)",
+      "1/( 1+ 1/f)",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 89,
+    "extra": false,
+    "type": "mc",
+    "question": "Złożoność obliczeniowa algorytmu to:",
+    "correct": [
+      "ilość zasobów komputera wymaganych do realizacji algorytmu",
+      "ilość zasobów komputera wymaganych do realizacji algorytmu jako funkcja rozmiaru danych wejściowych"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "stopień skomplikowania algorytmu",
+      "wymagany stopień skomplikowania komputera konieczny do realizacji algorytmu",
+      "ilość zasobów komputera wymaganych do realizacji algorytmu dla najbardziej wymagających (skomplikowanych) danych"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 90,
+    "extra": false,
+    "type": "mc",
+    "question": "Złożoność pesymistyczna algorytmu oznacza:",
+    "correct": [
+      "złożoność dla najmniej korzystnych przypadków danych wejściowych"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "złożoność dla największych dopuszczalnych danych",
+      "złożoność dla najmniej korzystnych warunków realizacji zadania",
+      "złożoność dla najmniej korzystnych architektur procesorów"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 91,
+    "extra": false,
+    "type": "mc",
+    "question": "Algorytmy sortowania posiadają złożoność czasową:",
+    "correct": [
+      "problem nie posiada rozwiązania, prowadzi do sprzeczności"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "liniową (problem „łatwy”)",
+      "wielomianową (problem „łatwy”)",
+      "wykładniczą (problem „trudny”)",
+      "silnia (problem „trudny”)",
+      "nie można określić nie podając o jaką złożoność chodzi (optymistyczną, pesymistyczną czy oczekiwaną)"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 92,
+    "extra": false,
+    "type": "mc",
+    "question": "Złożoność czasowa algorytmu obliczania średniej ciągu liczb jest funkcją liczby liczb w ciągu:",
+    "correct": [
+      "nie można określić nie podając o jaką złożoność chodzi (optymistyczną, pesymistyczną czy oczekiwaną)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "liniową (problem „łatwy”)",
+      "wielomianową (problem „łatwy”)",
+      "wykładniczą (problem „trudny”)",
+      "silnia (problem „trudny”)",
+      "problem nie posiada rozwiązania, prowadzi do sprzeczności"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 15,
+    "extra": true,
+    "type": "mc",
+    "question": "Środowisko RPC:",
+    "correct": [
+      "korzysta zawsze z protokołu TCP/IP",
+      "stosuje transformację argumentów przesyłanych przez sieć do wspólnego formatu",
+      "wymusza określanie argumentów jako strumieni bajtów",
+      "posługuje się mechanizmem wersji programów"
+    ],
+    "uncertain": [
+      "korzysta zawsze z protokołu TCP/IP",
+      "stosuje transformację argumentów przesyłanych przez sieć do wspólnego formatu",
+      "wymusza określanie argumentów jako strumieni bajtów",
+      "posługuje się mechanizmem wersji programów"
+    ],
+    "wrong": [
+      "może prowadzić system operacyjny do konfliktów przy ustalaniu numerów portów serwera",
+      "umożliwia zdalne wywołanie procedur z wieloma argumentami"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 16,
+    "extra": true,
+    "type": "mc",
+    "question": "Model dostępu do pamięci wspólnej UMA (uniform memory access):",
+    "correct": [
+      "jest charakterystyczny dla systemów SMP (symmetric multiprocessing)",
+      "oznacza, że zawartość każdej komórki pamięci jest dostępna dla każdego procesora",
+      "oznacza, że zawartość każdej komórki jest dostępna dla każdego procesora w takim samym czasie"
+    ],
+    "uncertain": [
+      "oznacza, że zawartość każdej komórki jest dostępna dla każdego procesora w takim samym czasie"
+    ],
+    "wrong": [
+      "jest charakterystyczny dla systemów DSM (distributed shared memory)"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 32,
+    "extra": true,
+    "type": "mc",
+    "question": "Maszyna SIMD to:",
+    "correct": [
+      "komputer wektorowy",
+      "komputer macierzowy",
+      "komputer wieloprocesorowy",
+      "komputer SMP"
+    ],
+    "uncertain": [],
+    "wrong": [],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 33,
+    "extra": true,
+    "type": "mc",
+    "question": "SMP – czym się charakteryzuje:",
+    "correct": [
+      "słabo skalowalne",
+      "związek z NUMA",
+      "związek z UMA",
+      "związek z ccNUMA"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "niski koszt"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 34,
+    "extra": true,
+    "type": "mc",
+    "question": "Architektura komputerów równoległych, w której występuje wiele strumieni danych i jeden strumień rozkazów jest nazywana w klasyfikacji Flynna architekturą:",
+    "correct": [
+      "SIMD"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "MISD",
+      "SISD",
+      "MIMD",
+      "MISD",
+      "SISD",
+      "MPMD",
+      "SPMD",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 36,
+    "extra": true,
+    "type": "mc",
+    "question": "Współczesne procesory wielordzeniowe realizują model przetwarzania (na poziomie wielu rdzeni, nie na poziomie pojedynczego rdzenia):",
+    "correct": [
+      "MIMD",
+      "MPMD",
+      "SPMD"
+    ],
+    "uncertain": [
+      "MPMD",
+      "SPMD"
+    ],
+    "wrong": [
+      "MISD",
+      "SIMD",
+      "SISD",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 39,
+    "extra": true,
+    "type": "mc",
+    "question": "Rozkazy typu SIMD we współczesnych procesorach oznaczają rozkazy:",
+    "correct": [
+      "wykonywane równolegle na kilku liczbach",
+      "dotyczące zawartości rejestrów zawierających kilka spakowanych liczb",
+      "wykonywane we współpracy z koprocesorem wektorowym"
+    ],
+    "uncertain": [
+      "dotyczące zawartości rejestrów zawierających kilka spakowanych liczb",
+      "wykonywane we współpracy z koprocesorem wektorowym"
+    ],
+    "wrong": [
+      "dotyczące wyłącznie grafiki",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 41,
+    "extra": true,
+    "type": "mc",
+    "question": "Nazwa NUMA oznacza systemy wieloprocesorowe (wielordzeniowe):",
+    "correct": [
+      "z niejednolitym dostępem do pamięci(zawartości różnych komórek pamięci operacyjnej mogą być dostarczane procesorowi w różnych czasach)",
+      "skalujące się (dające się praktycznie wykorzystywać) dla liczb procesorów do rzędu kilkuset"
+    ],
+    "uncertain": [
+      "z niejednolitym dostępem do pamięci(zawartości różnych komórek pamięci operacyjnej mogą być dostarczane procesorowi w różnych czasach)",
+      "skalujące się (dające się praktycznie wykorzystywać) dla liczb procesorów do rzędu kilkuset"
+    ],
+    "wrong": [
+      "z jednolitym dostępem do pamięci (zawartość każdej komórki pamięci operacyjnej dostarczana procesorowi w takim samym czasief)",
+      "skalujące się (dające się praktycznie wykorzystywać) dla liczb procesorów do rzędu kilkunastu",
+      "skalujące się (dające się praktycznie wykorzystywać) dla liczb procesorów do rzędu kilkudziesięciu"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 42,
+    "extra": true,
+    "type": "mc",
+    "question": "Model dostępu do pamięci wspólnej ccNUMA (cache-coherent non-uniform memory access):",
+    "correct": [
+      "jest charakterystyczny dla systemów DSM (distributed shared memory)",
+      "oznacza że zawartość każdej komórki pamięci jest dostępna dla każdego procesora",
+      "jest charakterystyczny dla systemów SMP (symmetric multiprocessing)"
+    ],
+    "uncertain": [
+      "jest charakterystyczny dla systemów SMP (symmetric multiprocessing)"
+    ],
+    "wrong": [
+      "oznacza że zawartość każdej komórki jest dostępna dla każdego procesora w takim samym czasie",
+      "żadna odpowiedź nie jest prawdziwa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 43,
+    "extra": true,
+    "type": "mc",
+    "question": "Architektura DSM (distributed shared memory):",
+    "correct": [
+      "jest najczęściej związana z modelem dostępu do pamięci NUMA (non-uniform memory access)",
+      "może być stosowana w systemach o liczbie procesorów przekraczającej kilka tysięcy",
+      "jest najczęściej związana z modelem dostępu do pamięci ccNUMA (cache-coherent non-uniform memory access)",
+      "jest najlepiej skalującą się architekturą maszyn z pamięcią wspólną"
+    ],
+    "uncertain": [
+      "jest najczęściej związana z modelem dostępu do pamięci ccNUMA (cache-coherent non-uniform memory access)",
+      "jest najlepiej skalującą się architekturą maszyn z pamięcią wspólną"
+    ],
+    "wrong": [
+      "jest najczęściej związana z modelem dostępu do pamięci UMA (uniform memory access)",
+      "jest najtańszą architekturą komputerów wieloprocesorowych",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 44,
+    "extra": true,
+    "type": "mc",
+    "question": "Nazwa SMP (symmetric multiprocessing) oznacza systemy:",
+    "correct": [
+      "wieloprocesorowe, tzw. symetryczne (każdy procesor widzi system tak samo)",
+      "z niejednolitym dostępem do pamięci NUMA (zawartości różnych komórek pamięci operacyjnej mogą być dostarczane procesorowi w różnych czasach)",
+      "z jednolitym dostępem do pamięci UMA (zawartość każdej komórki pamięci operacyjnej dostarczana procesorowi w takim samym czasie)"
+    ],
+    "uncertain": [
+      "z jednolitym dostępem do pamięci UMA (zawartość każdej komórki pamięci operacyjnej dostarczana procesorowi w takim samym czasie)"
+    ],
+    "wrong": [
+      "jednoprocesorowe",
+      "jednoprocesorowe z kartami graficznymi używanymi do obliczeń ogólnego przeznaczenia"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 45,
+    "extra": true,
+    "type": "mc",
+    "question": "Komputery SMP realizują model przetwarzania:",
+    "correct": [
+      "MIMD"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "SIMD",
+      "MISD",
+      "SISD"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 47,
+    "extra": true,
+    "type": "mc",
+    "question": "Rdzeń procesora wielordzeniowego:",
+    "correct": [
+      "może mieć własny dostęp do fragmentu pamięci głównej (architektura NUMA)"
+    ],
+    "uncertain": [
+      "może mieć własny dostęp do fragmentu pamięci głównej (architektura NUMA)"
+    ],
+    "wrong": [
+      "jest bardzo zbliżony do dawnych procesorów (jednordzeniowych), ale nie potrafi wykonywać bardziej złożonych rozkazów",
+      "jest bardzo zbliżony do dawnych procesorów (jednordzeniowych), ale bez pamięci podręcznej L2 i L3",
+      "wydziela znacznie mniej ciepła niż procesor jednordzeniowy o tej samej częstotliwości pracy",
+      "żadne stwierdzenie nie jest prawdziwe"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 74,
+    "extra": true,
+    "type": "mc",
+    "question": "Szerokość połowienia danego układu (topologii) procesorów oznacza:",
+    "correct": [
+      "minimalną liczbę krawędzi, których usunięcie dzieli układ na pół"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "minimalną liczbę procesorów na przekroju połowiczym układu",
+      "maksymalną liczbę krawędzi łączących połowę liczby procesorów",
+      "każda odpowiedź jest prawidłowa",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 75,
+    "extra": true,
+    "type": "mc",
+    "question": "Szerokość połowienia danego układu (topologii) procesorów w największym stopniu informuje o:",
+    "correct": [
+      "przepustowości układu"
+    ],
+    "uncertain": [
+      "przepustowości układu"
+    ],
+    "wrong": [
+      "odporności układu na awarie",
+      "zdolności efektywnej realizacji rozgłaszania",
+      "koszcie układu",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 76,
+    "extra": true,
+    "type": "mc",
+    "question": "Liczba krawędzi układu (topologii) procesorów w największym stopniu informuje o:",
+    "correct": [
+      "koszcie układu",
+      "odporności układu na awarie"
+    ],
+    "uncertain": [
+      "koszcie układu",
+      "odporności układu na awarie"
+    ],
+    "wrong": [
+      "przepustowości układu",
+      "koszcie stworzenia sieci dla danego układu"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 77,
+    "extra": true,
+    "type": "mc",
+    "question": "Średnica topologii hiperkostki dla p procesorów wynosi:",
+    "correct": [
+      "log p"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "1/2 p",
+      "p",
+      "p log p",
+      "1/2 p log p",
+      "żadna odpowiedź nie jest poprawna"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 78,
+    "extra": true,
+    "type": "mc",
+    "question": "Liczba krawędzi topologii hiperkostki dla p procesów wynosi",
+    "correct": [
+      "1/2 log p"
+    ],
+    "uncertain": [
+      "1/2 log p"
+    ],
+    "wrong": [
+      "2p",
+      "p*p log p"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 79,
+    "extra": true,
+    "type": "mc",
+    "question": "Średnica topologii torusa 2D dla p procesów wynosi:",
+    "correct": [
+      "sqrt(p)"
+    ],
+    "uncertain": [],
+    "wrong": [
+      "1/2 sqrt(p)",
+      "p * sqrt(p) d 1/2 *p * sqrt(p)",
+      "żadna odpowiedź nie jest prawidłowa"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 80,
+    "extra": true,
+    "type": "mc",
+    "question": "Szerokość połowienia topologii torusa 2D dla p procesów wynosi:",
+    "correct": [
+      "2*sqrt(p)"
+    ],
+    "uncertain": [
+      "2*sqrt(p)"
+    ],
+    "wrong": [
+      "p",
+      "1/2p*sqrt(p)"
+    ],
+    "explanation": ""
+  },
+  {
+    "source": "PW",
+    "source_num": 81,
+    "extra": true,
+    "type": "mc",
+    "question": "Połączalność krawędziowa (arc connectivity) danego układu (topologii) procesorów oznacza:",
+    "correct": [
+      "minimalną liczbę krawędzi, których usunięcie dzieli układ na dwie sieci rozłączne Historia zmian v.1.03 - zmiany w zadaniach 7, 16, 25, 27, 32, 33, 37, 42, 44, 50, 57, 58, 59, 69, 87, 91, 92 Przeniesione z powrotem do sekcji obowiązkowych 35, 37, 38, 40, 46, 48 v.1.02 - zmiany w zadaniach 1, 2, 9, 14, 27, 32, 48, 49, 51, 52, 57, 58, 60, 90 v.1.01 - zadania nieobowiązkowe przesunięte na koniec - zmiany w zadaniach: 1, 2, 3, 4, 5, 6, 7, 17, 18, 19, 20, 21, 24, 25, 26, 55, 56, 69, 71, 87 - zlikwidowane powtórzenia zadań: (1, 17), (28, 82), (29, 83)"
+    ],
+    "uncertain": [
+      "minimalną liczbę krawędzi, których usunięcie dzieli układ na dwie sieci rozłączne Historia zmian v.1.03 - zmiany w zadaniach 7, 16, 25, 27, 32, 33, 37, 42, 44, 50, 57, 58, 59, 69, 87, 91, 92 Przeniesione z powrotem do sekcji obowiązkowych 35, 37, 38, 40, 46, 48 v.1.02 - zmiany w zadaniach 1, 2, 9, 14, 27, 32, 48, 49, 51, 52, 57, 58, 60, 90 v.1.01 - zadania nieobowiązkowe przesunięte na koniec - zmiany w zadaniach: 1, 2, 3, 4, 5, 6, 7, 17, 18, 19, 20, 21, 24, 25, 26, 55, 56, 69, 71, 87 - zlikwidowane powtórzenia zadań: (1, 17), (28, 82), (29, 83)"
+    ],
+    "wrong": [
+      "maksymalną liczbę krawędzi łączących połowę liczby procesorów",
+      "minimalną liczbę krawędzi, których usunięcie dzieli układ na pół"
+    ],
+    "explanation": ""
+  }
+]

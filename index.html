@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nauka — Programowanie równoległe</title>
+<style>
+  :root{
+    --bg:#0f172a; --bg2:#1e293b; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --primary:#6366f1; --primary-d:#4f46e5; --primary-l:#eef2ff;
+    --green:#16a34a; --green-l:#dcfce7; --red:#dc2626; --red-l:#fee2e2;
+    --amber:#d97706; --line:#e2e8f0; --shadow:0 10px 30px rgba(2,6,23,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(135deg,#1e1b4b 0%,#0f172a 50%,#172554 100%);
+    min-height:100vh;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 60px}
+
+  /* Header */
+  header.app{display:flex;align-items:center;gap:14px;color:#fff;margin-bottom:22px}
+  .logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#818cf8,#22d3ee);
+    display:grid;place-items:center;font-size:24px;box-shadow:var(--shadow);flex:0 0 auto}
+  header.app h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
+  header.app p{margin:2px 0 0;font-size:13px;color:#cbd5e1}
+
+  .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:26px}
+
+  /* Home */
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+  .stat{flex:1;min-width:120px;background:var(--primary-l);border-radius:14px;padding:14px 16px}
+  .stat b{display:block;font-size:26px;color:var(--primary-d);line-height:1}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+    margin:22px 0 12px;font-weight:700}
+
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:600px){.modes{grid-template-columns:1fr}}
+  .mode{border:2px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;
+    transition:.15s;background:#fff;text-align:left;display:flex;gap:14px;align-items:flex-start}
+  .mode:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .mode:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+  .mode .ic{font-size:26px;flex:0 0 auto}
+  .mode h3{margin:0 0 4px;font-size:16px}
+  .mode p{margin:0;font-size:13px;color:var(--muted);line-height:1.4}
+
+  /* Settings */
+  .settings{display:grid;gap:14px;margin-top:8px}
+  .field{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .field label{font-size:14px;font-weight:600}
+  .field .hint{font-size:12px;color:var(--muted);font-weight:400}
+  select,input[type=number]{font:inherit;padding:9px 12px;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);min-width:120px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{font:inherit;padding:8px 14px;border:1.5px solid var(--line);background:#fff;
+    border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+  .seg button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .switch{position:relative;width:46px;height:26px;flex:0 0 auto}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:30px;transition:.2s;cursor:pointer}
+  .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;
+    border-radius:50%;transition:.2s}
+  .switch input:checked + .slider{background:var(--green)}
+  .switch input:checked + .slider:before{transform:translateX(20px)}
+
+  /* Quiz */
+  .quizbar{display:flex;align-items:center;justify-content:space-between;color:#fff;margin-bottom:14px;gap:12px}
+  .quizbar .meta{font-size:14px;font-weight:600}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:none;padding:8px 14px;border-radius:10px;
+    cursor:pointer;font:inherit;font-weight:600;font-size:13px}
+  .btn-ghost:hover{background:rgba(255,255,255,.22)}
+  .progress{height:8px;background:rgba(255,255,255,.18);border-radius:10px;overflow:hidden;margin-bottom:18px}
+  .progress > div{height:100%;background:linear-gradient(90deg,#818cf8,#22d3ee);width:0;transition:.3s}
+
+  .badges{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
+  .badge.src{background:#e0e7ff;color:#4338ca}
+  .badge.pw{background:#cffafe;color:#0e7490}
+  .badge.multi{background:#fef3c7;color:#92400e}
+  .badge.open{background:#f3e8ff;color:#7e22ce}
+  .badge.warn{background:#fde68a;color:#92400e}
+
+  .warnbox{display:flex;gap:10px;align-items:flex-start;background:#fffbeb;border:1.5px solid #fde68a;
+    border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:13.5px;color:#92400e;line-height:1.45}
+  .warnbox .wic{font-size:18px;flex:0 0 auto}
+  .opt.uncertain{border-color:#f59e0b;background:#fffbeb}
+  .opt.uncertain .mark{background:#f59e0b;border-color:#f59e0b}
+  .opt .unc{display:inline-block;font-size:11px;font-weight:700;color:#92400e;background:#fde68a;
+    border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle}
+
+  .qtext{font-size:19px;font-weight:600;line-height:1.5;margin-bottom:18px;white-space:pre-wrap}
+
+  .options{display:grid;gap:10px}
+  .opt{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:13px;
+    padding:13px 15px;cursor:pointer;transition:.12s;background:#fff;font-size:15px;line-height:1.4}
+  .opt:hover{border-color:#c7d2fe;background:#fafbff}
+  .opt.sel{border-color:var(--primary);background:var(--primary-l)}
+  .opt .mark{width:22px;height:22px;border:2px solid #cbd5e1;flex:0 0 auto;display:grid;place-items:center;
+    font-size:13px;color:#fff;transition:.12s;margin-top:1px}
+  .opt.multi .mark{border-radius:6px}
+  .opt.single .mark{border-radius:50%}
+  .opt.sel .mark{background:var(--primary);border-color:var(--primary)}
+  .opt.correct{border-color:var(--green);background:var(--green-l)}
+  .opt.correct .mark{background:var(--green);border-color:var(--green)}
+  .opt.wrong{border-color:var(--red);background:var(--red-l)}
+  .opt.wrong .mark{background:var(--red);border-color:var(--red)}
+  .opt .reason{display:block;font-size:12.5px;color:var(--muted);margin-top:5px;font-style:italic}
+
+  .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .btn{font:inherit;font-weight:700;font-size:15px;padding:13px 22px;border-radius:12px;border:none;
+    cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-d)}
+  .btn-primary:disabled{background:#c7d2fe;cursor:not-allowed}
+  .btn-sec{background:#f1f5f9;color:var(--ink)}
+  .btn-sec:hover{background:#e2e8f0}
+  .btn-ok{background:var(--green);color:#fff}
+  .btn-no{background:var(--red);color:#fff}
+
+  .explain{margin-top:18px;border-left:4px solid var(--primary);background:#f8faff;border-radius:0 12px 12px 0;
+    padding:14px 16px;display:none}
+  .explain.show{display:block;animation:fade .3s}
+  .explain h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--primary-d)}
+  .explain .body{font-size:14px;line-height:1.55;white-space:pre-wrap;color:#334155;max-height:340px;overflow:auto}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+
+  .verdict{font-weight:700;font-size:15px;margin-top:16px;padding:10px 14px;border-radius:10px}
+  .verdict.ok{background:var(--green-l);color:#166534}
+  .verdict.bad{background:var(--red-l);color:#991b1b}
+
+  /* Results */
+  .score-ring{width:150px;height:150px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;
+    background:conic-gradient(var(--green) var(--p,0%),#e2e8f0 0);}
+  .score-ring .inner{width:118px;height:118px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center}
+  .score-ring b{font-size:30px;line-height:1}
+  .score-ring span{font-size:12px;color:var(--muted)}
+  .review{margin-top:18px;display:grid;gap:8px;max-height:360px;overflow:auto}
+  .rev{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#f8fafc;
+    font-size:14px;cursor:pointer;border:1px solid var(--line)}
+  .rev:hover{background:#eef2ff}
+  .rev .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:0 0 auto}
+  .rev.ok .dot{background:var(--green)} .rev.bad .dot{background:var(--red)}
+  .hide{display:none}
+  .center{text-align:center}
+  footer{color:#94a3b8;font-size:12px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <div class="logo">🎓</div>
+    <div>
+      <h1>Nauka — Programowanie równoległe i współbieżne</h1>
+      <p>Baza pytań z Twoich plików PDF · test wielokrotnego wyboru z wyjaśnieniami</p>
+    </div>
+  </header>
+
+  <!-- ============ HOME ============ -->
+  <div id="home" class="card">
+    <div class="stats" id="stats"></div>
+
+    <div class="section-title">Ustawienia testu</div>
+    <div class="settings">
+      <div class="field">
+        <div><label>Liczba pytań w teście</label> <span class="hint">(tryb „Test")</span></div>
+        <input type="number" id="numQ" value="25" min="1" max="130">
+      </div>
+      <div class="field">
+        <label>Źródło pytań</label>
+        <div class="seg" id="srcSeg">
+          <button data-src="all" class="active">Wszystkie</button>
+          <button data-src="PRO-MAX">PRO-MAX</button>
+          <button data-src="PW">Egzamin PW</button>
+        </div>
+      </div>
+      <div class="field">
+        <div><label>Pomieszaj kolejność odpowiedzi</label></div>
+        <label class="switch"><input type="checkbox" id="shuf" checked><span class="slider"></span></label>
+      </div>
+      <div class="field">
+        <div><label>Dołącz pytania otwarte</label> <span class="hint">(do wpisania / obliczeniowe)</span></div>
+        <label class="switch"><input type="checkbox" id="incOpen" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="section-title">Wybierz tryb</div>
+    <div class="modes">
+      <button class="mode" onclick="startTest()">
+        <div class="ic">📝</div>
+        <div><h3>Test (<span id="testN">25</span> pytań)</h3>
+          <p>Losowy zestaw pytań, na końcu wynik i ocena.</p></div>
+      </button>
+      <button class="mode" onclick="startRandom()">
+        <div class="ic">🎲</div>
+        <div><h3>Tryb losowy</h3>
+          <p>Pytania losowane bez końca — nauka na spokojnie.</p></div>
+      </button>
+      <button class="mode" onclick="startAll()">
+        <div class="ic">📚</div>
+        <div><h3>Przerabianie po kolei</h3>
+          <p>Wszystkie pytania w kolejności, z wyjaśnieniami.</p></div>
+      </button>
+      <button class="mode" id="errBtn" onclick="startErrors()">
+        <div class="ic">🔁</div>
+        <div><h3>Powtórka błędów</h3>
+          <p id="errInfo">Pytania, w których się pomyliłeś.</p></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div id="quiz" class="hide">
+    <div class="quizbar">
+      <span class="meta" id="qMeta">Pytanie 1 / 25</span>
+      <span class="meta" id="qScore">Wynik: 0</span>
+      <button class="btn-ghost" onclick="exitQuiz()">✕ Zakończ</button>
+    </div>
+    <div class="progress"><div id="progBar"></div></div>
+    <div class="card">
+      <div class="badges" id="badges"></div>
+      <div class="qtext" id="qText"></div>
+      <div class="options" id="opts"></div>
+      <div class="verdict hide" id="verdict"></div>
+      <div class="explain" id="explain">
+        <h4>💡 Wyjaśnienie</h4>
+        <div class="body" id="explainBody"></div>
+      </div>
+      <div class="actions" id="actions"></div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="results" class="hide">
+    <div class="card center">
+      <div class="score-ring" id="ring"><div class="inner">
+        <div><b id="scoreNum">0/0</b><br><span id="scorePct">0%</span></div>
+      </div></div>
+      <h2 id="resTitle" style="margin:6px 0">Wynik</h2>
+      <p id="resMsg" style="color:var(--muted);margin-top:0"></p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-primary" onclick="location.reload()">🏠 Strona główna</button>
+        <button class="btn btn-sec" id="retryErrBtn" onclick="retryErrors()">🔁 Powtórz błędy</button>
+      </div>
+      <div class="section-title" style="text-align:left">Przegląd odpowiedzi</div>
+      <div class="review" id="review"></div>
+    </div>
+  </div>
+
+  <footer>Wygenerowano z: Nauka-PRO-MAX.pdf + PW-egzamin-opracowanie-pytan.pdf</footer>
+</div>
+
+<script src="questions.js"></script>
+<script>
+/* ================= Stan ================= */
+let SETTINGS = {src:"all", shuffle:true, includeOpen:true, num:25};
+let session = null;       // {list:[q...], pos, score, results:[]}
+const LS_ERR = "nauka_errors_v1";
+
+/* pula dystraktorow: wszystkie poprawne odpowiedzi z pytan MC */
+const POOL = (()=>{
+  const s = new Set();
+  QUESTIONS.forEach(q=>{ if(q.type==="mc") q.correct.forEach(c=>s.add(c)); });
+  return [...s];
+})();
+
+/* ================= Narzedzia ================= */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function splitReason(t){
+  const idx = t.indexOf(" — ");
+  if(idx>0) return {label:t.slice(0,idx).trim(), reason:t.slice(idx+3).trim()};
+  return {label:t.trim(), reason:""};
+}
+function norm(s){return s.toLowerCase().replace(/\s+/g," ").trim();}
+
+function getErrors(){try{return JSON.parse(localStorage.getItem(LS_ERR)||"[]");}catch(e){return [];}}
+function setErrors(arr){localStorage.setItem(LS_ERR, JSON.stringify([...new Set(arr)]));}
+
+/* filtruj baze wg ustawien */
+function pool(){
+  return QUESTIONS.filter(q=>{
+    if(SETTINGS.src!=="all" && q.source!==SETTINGS.src) return false;
+    if(!SETTINGS.includeOpen && q.type==="open") return false;
+    return true;
+  });
+}
+
+/* zbuduj opcje dla pytania MC */
+function buildOptions(q){
+  const unc = q.uncertain||[];
+  let opts = q.correct.map(t=>({...splitReason(t), correct:true, uncertain:unc.includes(t)}));
+  q.wrong.forEach(t=>opts.push({...splitReason(t), correct:false, uncertain:false}));
+  // dopelnij dystraktorami jesli za malo opcji
+  if(opts.length < 4){
+    const have = new Set(opts.map(o=>norm(o.label)));
+    const cands = shuffle(POOL).filter(p=>!have.has(norm(p)) && !q.correct.some(c=>norm(c)===norm(p)));
+    for(const c of cands){ if(opts.length>=4)break; opts.push({label:c,reason:"",correct:false}); have.add(norm(c)); }
+  }
+  return SETTINGS.shuffle ? shuffle(opts) : opts;
+}
+
+/* ================= Start trybow ================= */
+function readSettings(){
+  SETTINGS.shuffle = document.getElementById("shuf").checked;
+  SETTINGS.includeOpen = document.getElementById("incOpen").checked;
+  SETTINGS.num = Math.max(1, parseInt(document.getElementById("numQ").value)||25);
+}
+function begin(list, scored){
+  if(!list.length){alert("Brak pytań dla wybranych ustawień.");return;}
+  session = {list, pos:0, score:0, results:[], scored};
+  document.getElementById("home").classList.add("hide");
+  document.getElementById("results").classList.add("hide");
+  document.getElementById("quiz").classList.remove("hide");
+  renderQuestion();
+}
+function startTest(){readSettings(); const p=shuffle(pool()).slice(0,SETTINGS.num); begin(p,true);}
+function startRandom(){readSettings(); begin(shuffle(pool()), false);}
+function startAll(){readSettings(); begin(pool().slice(), false);}
+function startErrors(){
+  readSettings();
+  const ids=getErrors(); const list=QUESTIONS.filter(q=>ids.includes(q.id));
+  if(!list.length){alert("Nie masz jeszcze zapisanych błędów. Rozwiąż najpierw jakiś test.");return;}
+  begin(shuffle(list), true);
+}
+function retryErrors(){const ids=getErrors(); const list=QUESTIONS.filter(q=>ids.includes(q.id));
+  if(!list.length){alert("Brak błędów do powtórki — brawo!");return;} begin(shuffle(list),true);}
+
+/* ================= Render pytania ================= */
+let current=null; // {q, opts, isMulti, answered}
+function renderQuestion(){
+  const q = session.list[session.pos];
+  current = {q, answered:false};
+  // pasek
+  document.getElementById("qMeta").textContent = `Pytanie ${session.pos+1} / ${session.list.length}`;
+  document.getElementById("qScore").textContent = `Wynik: ${session.score}`;
+  document.getElementById("progBar").style.width = (session.pos/session.list.length*100)+"%";
+  // badges
+  const badges=[];
+  badges.push(`<span class="badge src ${q.source==='PW'?'pw':''}">${q.source}${q.source_num?` · #${q.source_num}`:''}</span>`);
+  if(q.type==="open") badges.push(`<span class="badge open">PYTANIE OTWARTE</span>`);
+  else if(q.correct.length>1) badges.push(`<span class="badge multi">WIELE POPRAWNYCH</span>`);
+  const hasUnc = (q.uncertain&&q.uncertain.length) || q.uncertainOpen;
+  if(hasUnc) badges.push(`<span class="badge warn">⚠ NIEPEWNE</span>`);
+  document.getElementById("badges").innerHTML = badges.join("");
+  document.getElementById("qText").textContent = q.question;
+  // reset paneli
+  const exp=document.getElementById("explain"); exp.classList.remove("show");
+  exp.querySelector("h4").textContent="💡 Wyjaśnienie";
+  const ver=document.getElementById("verdict"); ver.className="verdict hide";
+  const optsEl=document.getElementById("opts"); optsEl.innerHTML="";
+  const actEl=document.getElementById("actions"); actEl.innerHTML="";
+
+  if(q.type==="open"){ renderOpen(q,optsEl,exp,actEl); return; }
+
+  // MC
+  const isMulti = q.correct.length>1;
+  current.isMulti = isMulti;
+  current.opts = buildOptions(q);
+  current.selected = new Set();
+  if(q.uncertain && q.uncertain.length){
+    const w=document.createElement("div"); w.className="warnbox";
+    const onlyUnc = q.correct.length===q.uncertain.length;
+    w.innerHTML=`<span class="wic">⚠️</span><div><b>Uwaga — odpowiedź niepewna.</b> ${onlyUnc?
+      "Dla tego pytania klucz jest <b>niepewny</b> (w PDF zaznaczony na żółto). Potraktuj odpowiedź orientacyjnie i zweryfikuj samodzielnie.":
+      "Część odpowiedzi jest <b>niepewna</b> (żółte zaznaczenie w PDF) — oznaczono je etykietą „niepewna”."}</div>`;
+    optsEl.appendChild(w);
+  }
+  if(isMulti){
+    const hint=document.createElement("div");
+    hint.style.cssText="font-size:13px;color:var(--muted);margin-bottom:10px";
+    hint.textContent="Zaznacz wszystkie poprawne odpowiedzi.";
+    optsEl.appendChild(hint);
+  }
+  current.opts.forEach((o,i)=>{
+    const el=document.createElement("div");
+    el.className="opt "+(isMulti?"multi":"single");
+    el.innerHTML=`<div class="mark"></div><div><span class="lbl"></span></div>`;
+    el.querySelector(".lbl").textContent=o.label;
+    el.onclick=()=>toggleOpt(i,el,isMulti);
+    optsEl.appendChild(el); o._el=el;
+  });
+  const check=document.createElement("button");
+  check.className="btn btn-primary"; check.id="checkBtn"; check.textContent="Sprawdź"; check.disabled=true;
+  check.onclick=gradeMC;
+  actEl.appendChild(check);
+}
+
+function toggleOpt(i,el,isMulti){
+  if(current.answered)return;
+  if(isMulti){
+    if(current.selected.has(i)){current.selected.delete(i);el.classList.remove("sel");el.querySelector(".mark").textContent="";}
+    else{current.selected.add(i);el.classList.add("sel");el.querySelector(".mark").textContent="✓";}
+  }else{
+    current.opts.forEach((o,j)=>{o._el.classList.remove("sel");o._el.querySelector(".mark").textContent="";});
+    current.selected=new Set([i]);el.classList.add("sel");el.querySelector(".mark").textContent="✓";
+  }
+  document.getElementById("checkBtn").disabled = current.selected.size===0;
+}
+
+function gradeMC(){
+  current.answered=true;
+  const correctIdx=new Set(); current.opts.forEach((o,i)=>{if(o.correct)correctIdx.add(i);});
+  let ok = current.selected.size===correctIdx.size && [...current.selected].every(i=>correctIdx.has(i));
+  // pokaz oznaczenia
+  current.opts.forEach((o,i)=>{
+    const el=o._el; el.classList.remove("sel"); el.onclick=null;
+    if(o.correct){
+      el.classList.add(o.uncertain?"uncertain":"correct");
+      el.querySelector(".mark").textContent="✓";
+      if(o.uncertain){
+        const tag=document.createElement("span");tag.className="unc";tag.textContent="niepewna";
+        el.querySelector(".lbl").after(tag);
+      }
+    }
+    else if(current.selected.has(i)){el.classList.add("wrong");el.querySelector(".mark").textContent="✕";}
+    if(!o.correct && o.reason){
+      const r=document.createElement("span");r.className="reason";r.textContent="Dlaczego źle: "+o.reason;
+      el.querySelector("div:last-child").appendChild(r);
+    }
+  });
+  finishQuestion(ok);
+}
+
+/* ===== pytania otwarte / do wpisania ===== */
+function renderOpen(q,optsEl,exp,actEl){
+  const info=document.createElement("div");
+  info.style.cssText="font-size:13px;color:var(--muted);margin-bottom:8px";
+  info.textContent="Pytanie do wpisania — wpisz swoją odpowiedź, potem odsłoń wzorcową i porównaj.";
+  optsEl.appendChild(info);
+  if(q.uncertainOpen){
+    const w=document.createElement("div"); w.className="warnbox";
+    w.innerHTML=`<span class="wic">⚠️</span><div><b>Uwaga — odpowiedź niepewna.</b> Wzorcowa odpowiedź była w PDF zaznaczona na żółto (autor nie był pewien). Traktuj ją orientacyjnie.</div>`;
+    optsEl.appendChild(w);
+  }
+  const ta=document.createElement("textarea");
+  ta.placeholder="Tu wpisz swoją odpowiedź…";
+  ta.style.cssText="width:100%;min-height:90px;font:inherit;padding:12px 14px;border:2px solid var(--line);"+
+    "border-radius:13px;resize:vertical;line-height:1.5";
+  optsEl.appendChild(ta);
+
+  const show=document.createElement("button");
+  show.className="btn btn-primary"; show.textContent="Pokaż poprawną odpowiedź";
+  show.onclick=()=>{
+    ta.readOnly=true; ta.style.background="#f8fafc";
+    exp.classList.add("show");
+    document.getElementById("explainBody").textContent = q.explanation || "(brak)";
+    document.getElementById("explain").querySelector("h4").textContent="✅ Poprawna odpowiedź / wyjaśnienie";
+    actEl.innerHTML="";
+    const lbl=document.createElement("div");
+    lbl.style.cssText="width:100%;font-size:13px;color:var(--muted);margin-bottom:4px";
+    lbl.textContent="Czy Twoja odpowiedź się zgadza?";
+    actEl.appendChild(lbl);
+    const ok=document.createElement("button");ok.className="btn btn-ok";ok.textContent="✓ Dobrze";
+    ok.onclick=()=>{current.answered=true;finishQuestion(true);};
+    const no=document.createElement("button");no.className="btn btn-no";no.textContent="✕ Źle";
+    no.onclick=()=>{current.answered=true;finishQuestion(false);};
+    actEl.appendChild(ok);actEl.appendChild(no);
+  };
+  actEl.appendChild(show);
+}
+
+/* ===== zakonczenie pytania ===== */
+function finishQuestion(ok){
+  const q=current.q;
+  if(ok)session.score++;
+  session.results.push({q, ok});
+  document.getElementById("qScore").textContent=`Wynik: ${session.score}`;
+  // zapis bledow
+  let errs=getErrors();
+  if(ok){errs=errs.filter(id=>id!==q.id);} else if(!errs.includes(q.id)){errs.push(q.id);}
+  setErrors(errs);
+  // werdykt
+  const ver=document.getElementById("verdict");
+  ver.className="verdict "+(ok?"ok":"bad");
+  ver.textContent = ok ? "✓ Dobrze!" : "✕ Niepoprawnie";
+  // wyjasnienie (dla MC)
+  if(q.type==="mc" && q.explanation){
+    document.getElementById("explain").classList.add("show");
+    document.getElementById("explainBody").textContent=q.explanation;
+  }
+  // przycisk dalej
+  const actEl=document.getElementById("actions"); actEl.innerHTML="";
+  const next=document.createElement("button"); next.className="btn btn-primary";
+  const last = session.pos>=session.list.length-1;
+  next.textContent = last ? "Zobacz wynik →" : "Następne pytanie →";
+  next.onclick=()=>{ if(last)showResults(); else {session.pos++;renderQuestion();window.scrollTo({top:0,behavior:'smooth'});} };
+  actEl.appendChild(next);
+}
+
+/* ================= Wyniki ================= */
+function showResults(){
+  document.getElementById("quiz").classList.add("hide");
+  document.getElementById("results").classList.remove("hide");
+  const total=session.list.length, sc=session.score, pct=Math.round(sc/total*100);
+  document.getElementById("scoreNum").textContent=`${sc}/${total}`;
+  document.getElementById("scorePct").textContent=`${pct}%`;
+  const ring=document.getElementById("ring");
+  ring.style.setProperty("--p",pct+"%");
+  ring.style.background=`conic-gradient(${pct>=50?'var(--green)':'var(--red)'} ${pct}%, #e2e8f0 0)`;
+  let title,msg;
+  if(pct>=90){title="Świetnie! 🏆";msg="Rewelacyjny wynik — materiał opanowany.";}
+  else if(pct>=70){title="Dobra robota! 👍";msg="Solidnie, jeszcze tylko kilka szczegółów do dopracowania.";}
+  else if(pct>=50){title="Nieźle 🙂";msg="Podstawy są — powtórz błędy, żeby podbić wynik.";}
+  else {title="Do powtórki 💪";msg="Spokojnie, przerób błędne pytania i spróbuj ponownie.";}
+  document.getElementById("resTitle").textContent=title;
+  document.getElementById("resMsg").textContent=msg;
+  document.getElementById("retryErrBtn").style.display = getErrors().length? "" : "none";
+  // przeglad
+  const rev=document.getElementById("review"); rev.innerHTML="";
+  session.results.forEach((r,i)=>{
+    const d=document.createElement("div"); d.className="rev "+(r.ok?"ok":"bad");
+    d.innerHTML=`<div class="dot"></div><div><b>${i+1}.</b> ${r.q.question.slice(0,90)}${r.q.question.length>90?'…':''}</div>`;
+    d.onclick=()=>showReview(r.q,r.ok);
+    rev.appendChild(d);
+  });
+}
+function showReview(q,ok){
+  const ans = q.type==="mc" ? ("Poprawne: "+q.correct.join("  •  ")) : "";
+  const txt = `${q.question}\n\n${ans}${ans?"\n\n":""}${q.explanation||""}`;
+  alert(txt);
+}
+
+function exitQuiz(){ if(confirm("Zakończyć i wrócić do strony głównej?")) location.reload(); }
+
+/* ================= Init ================= */
+(function init(){
+  const mc=QUESTIONS.filter(q=>q.type==="mc").length;
+  const op=QUESTIONS.filter(q=>q.type==="open").length;
+  const unc=QUESTIONS.filter(q=>(q.uncertain&&q.uncertain.length)||q.uncertainOpen).length;
+  document.getElementById("stats").innerHTML=`
+    <div class="stat"><b>${QUESTIONS.length}</b><span>pytań łącznie</span></div>
+    <div class="stat"><b>${mc}</b><span>wielokrotnego wyboru</span></div>
+    <div class="stat"><b>${op}</b><span>otwartych</span></div>
+    <div class="stat" style="background:#fffbeb"><b style="color:#b45309">${unc}</b><span>z odp. niepewną ⚠️</span></div>`;
+  // src segment
+  document.querySelectorAll("#srcSeg button").forEach(b=>{
+    b.onclick=()=>{document.querySelectorAll("#srcSeg button").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active"); SETTINGS.src=b.dataset.src;};
+  });
+  const numEl=document.getElementById("numQ");
+  numEl.addEventListener("input",()=>document.getElementById("testN").textContent=numEl.value||"25");
+  // błędy
+  const errN=getErrors().length;
+  document.getElementById("errInfo").textContent = errN? `Masz ${errN} zapisanych błędów do powtórki.` : "Brak zapisanych błędów (rozwiąż test).";
+})();
+</script>
+</body>
+</html>
