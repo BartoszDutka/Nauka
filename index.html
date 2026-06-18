@@ -436,7 +436,7 @@ function renderQuestion(){
   const badges=[];
   badges.push(`<span class="badge src ${q.source==='PW'?'pw':''}">${q.source}${q.source_num?` · #${q.source_num}`:''}</span>`);
   if(q.type==="open") badges.push(`<span class="badge open">PYTANIE OTWARTE</span>`);
-  else if(q.correct.length>1) badges.push(`<span class="badge multi">WIELE POPRAWNYCH</span>`);
+  else badges.push(`<span class="badge multi">WYBIERZ ODPOWIEDZI</span>`);
   const hasUnc = (q.uncertain&&q.uncertain.length) || q.uncertainOpen;
   if(hasUnc) badges.push(`<span class="badge warn">⚠ NIEPEWNE</span>`);
   document.getElementById("badges").innerHTML = badges.join("");
@@ -450,9 +450,8 @@ function renderQuestion(){
 
   if(q.type==="open"){ renderOpen(q,optsEl,exp,actEl); return; }
 
-  // MC
-  const isMulti = q.correct.length>1;
-  current.isMulti = isMulti;
+  // MC — zawsze wielokrotny wybor (checkboxy), nawet przy jednej poprawnej
+  current.isMulti = true;
   current.opts = buildOptions(q);
   current.selected = new Set();
   if(q.uncertain && q.uncertain.length){
@@ -463,18 +462,16 @@ function renderQuestion(){
       "Część odpowiedzi jest <b>niepewna</b> (żółte zaznaczenie w PDF) — oznaczono je etykietą „niepewna”."}</div>`;
     optsEl.appendChild(w);
   }
-  if(isMulti){
-    const hint=document.createElement("div");
-    hint.style.cssText="font-size:13px;color:var(--muted);margin-bottom:10px";
-    hint.textContent="Zaznacz wszystkie poprawne odpowiedzi.";
-    optsEl.appendChild(hint);
-  }
+  const hint=document.createElement("div");
+  hint.style.cssText="font-size:13px;color:var(--muted);margin-bottom:10px";
+  hint.textContent="Zaznacz wszystkie poprawne odpowiedzi (możesz wybrać kilka).";
+  optsEl.appendChild(hint);
   current.opts.forEach((o,i)=>{
     const el=document.createElement("div");
-    el.className="opt "+(isMulti?"multi":"single");
+    el.className="opt multi";
     el.innerHTML=`<div class="mark"></div><div><span class="lbl"></span></div>`;
     el.querySelector(".lbl").textContent=o.label;
-    el.onclick=()=>toggleOpt(i,el,isMulti);
+    el.onclick=()=>toggleOpt(i,el);
     optsEl.appendChild(el); o._el=el;
   });
   const check=document.createElement("button");
@@ -483,14 +480,12 @@ function renderQuestion(){
   actEl.appendChild(check);
 }
 
-function toggleOpt(i,el,isMulti){
+function toggleOpt(i,el){
   if(current.answered)return;
-  if(isMulti){
-    if(current.selected.has(i)){current.selected.delete(i);el.classList.remove("sel");el.querySelector(".mark").textContent="";}
-    else{current.selected.add(i);el.classList.add("sel");el.querySelector(".mark").textContent="✓";}
+  if(current.selected.has(i)){
+    current.selected.delete(i);el.classList.remove("sel");el.querySelector(".mark").textContent="";
   }else{
-    current.opts.forEach((o,j)=>{o._el.classList.remove("sel");o._el.querySelector(".mark").textContent="";});
-    current.selected=new Set([i]);el.classList.add("sel");el.querySelector(".mark").textContent="✓";
+    current.selected.add(i);el.classList.add("sel");el.querySelector(".mark").textContent="✓";
   }
   document.getElementById("checkBtn").disabled = current.selected.size===0;
 }
