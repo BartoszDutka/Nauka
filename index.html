@@ -139,12 +139,18 @@
   .score-ring .inner{width:118px;height:118px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center}
   .score-ring b{font-size:30px;line-height:1}
   .score-ring span{font-size:12px;color:var(--muted)}
-  .review{margin-top:18px;display:grid;gap:8px;max-height:360px;overflow:auto}
-  .rev{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#f8fafc;
-    font-size:14px;cursor:pointer;border:1px solid var(--line)}
-  .rev:hover{background:#eef2ff}
-  .rev .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:0 0 auto}
-  .rev.ok .dot{background:var(--green)} .rev.bad .dot{background:var(--red)}
+  .review{margin-top:18px;display:grid;gap:16px;text-align:left}
+  .rev-card{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
+  .rev-card.ok{border-left:4px solid var(--green)}
+  .rev-card.bad{border-left:4px solid var(--red)}
+  .rev-card .rev-head{font-weight:700;font-size:15px;margin-bottom:12px}
+  .rev-card h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.6px;font-weight:700}
+  .rev-card h4:first-of-type{margin-top:0}
+  .rev-card .qtext{font-size:16px;font-weight:600;line-height:1.5;white-space:pre-wrap;color:var(--ink)}
+  .rev-card .block{font-size:14px;line-height:1.55;white-space:pre-wrap;padding:10px 12px;border-radius:10px}
+  .rev-card .block.user{background:#f8fafc;border:1px solid var(--line)}
+  .rev-card .block.correct{background:var(--green-l);color:#166534}
+  .rev-card .block.expl{background:#f8faff;border-left:3px solid var(--primary);border-radius:0 10px 10px 0}
   .hide{display:none}
   .center{text-align:center}
   footer{color:#94a3b8;font-size:12px;text-align:center;margin-top:26px}
@@ -281,6 +287,63 @@ function splitReason(t){
   return {label:t.trim(), reason:""};
 }
 function norm(s){return s.toLowerCase().replace(/\s+/g," ").trim();}
+function escapeHtml(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/** Poprawna odpowiedź (tekst). */
+function formatCorrectAnswer(q){
+  if(q.type === "open"){
+    const expl = (q.explanation || "").trim();
+    if(!expl) return "—";
+    const m = expl.match(/^Odpowiedź:\s*(.+?)(?:\n\n|\nWyjaśnienie|$)/s);
+    if(m) return m[1].trim();
+    return expl.split("\n\n")[0].trim() || expl;
+  }
+  const unc = q.uncertain || [];
+  const sure = q.correct.filter(c => !unc.includes(c));
+  const unsure = q.correct.filter(c => unc.includes(c));
+  const parts = [];
+  if(sure.length) parts.push(sure.join("  •  "));
+  if(unsure.length) parts.push("(niepewna) " + unsure.join("  •  "));
+  return parts.join("\n") || "—";
+}
+
+/** Samo wyjaśnienie (bez poprawnej odpowiedzi). */
+function formatExplanationOnly(q){
+  const expl = (q.explanation || "").trim();
+  if(!expl) return "Brak wyjaśnienia.";
+  if(q.type === "open"){
+    let rest = expl;
+    if(rest.startsWith("Odpowiedź:")){
+      rest = rest.replace(/^Odpowiedź:\s*[^\n]*\n?/, "").trim();
+      rest = rest.replace(/^Wyjaśnienie\s*/i, "").trim();
+    }
+    return rest || "Brak wyjaśnienia.";
+  }
+  return expl;
+}
+
+/** Tekst wyjasnienia w panelu po sprawdzeniu (poprawna + wyjasnienie). */
+function formatExplanation(q){
+  const correct = formatCorrectAnswer(q);
+  const expl = formatExplanationOnly(q);
+  if(q.type === "mc" && correct !== "—"){
+    return "Poprawna odpowiedź: " + correct.replace(/\n/g, "  •  ") + "\n\n" + expl;
+  }
+  if(q.type === "open") return correct + (expl !== "Brak wyjaśnienia." ? "\n\n" + expl : "\n\n" + expl);
+  return expl;
+}
+
+/** Pokaz panel wyjasnienia (po sprawdzeniu odpowiedzi we wszystkich trybach). */
+function showExplanationPanel(q, openStyle){
+  const exp = document.getElementById("explain");
+  exp.classList.add("show");
+  exp.querySelector("h4").textContent = openStyle
+    ? "✅ Poprawna odpowiedź / wyjaśnienie"
+    : "💡 Wyjaśnienie";
+  document.getElementById("explainBody").textContent = formatExplanation(q);
+}
 
 function getErrors(){try{return JSON.parse(localStorage.getItem(LS_ERR)||"[]");}catch(e){return [];}}
 function setErrors(arr){localStorage.setItem(LS_ERR, JSON.stringify([...new Set(arr)]));}
@@ -472,14 +535,13 @@ function renderOpen(q,optsEl,exp,actEl){
   ta.style.cssText="width:100%;min-height:90px;font:inherit;padding:12px 14px;border:2px solid var(--line);"+
     "border-radius:13px;resize:vertical;line-height:1.5";
   optsEl.appendChild(ta);
+  current.openInput = ta;
 
   const show=document.createElement("button");
   show.className="btn btn-primary"; show.textContent="Pokaż poprawną odpowiedź";
   show.onclick=()=>{
     ta.readOnly=true; ta.style.background="#f8fafc";
-    exp.classList.add("show");
-    document.getElementById("explainBody").textContent = q.explanation || "(brak)";
-    document.getElementById("explain").querySelector("h4").textContent="✅ Poprawna odpowiedź / wyjaśnienie";
+    showExplanationPanel(q, true);
     actEl.innerHTML="";
     const lbl=document.createElement("div");
     lbl.style.cssText="width:100%;font-size:13px;color:var(--muted);margin-bottom:4px";
@@ -497,8 +559,15 @@ function renderOpen(q,optsEl,exp,actEl){
 /* ===== zakonczenie pytania ===== */
 function finishQuestion(ok){
   const q=current.q;
+  let userAnswer = "—";
+  if(q.type === "mc" && current.opts){
+    const sel = [...current.selected].sort((a,b)=>a-b).map(i => current.opts[i].label);
+    userAnswer = sel.length ? sel.join("  •  ") : "—";
+  } else if(q.type === "open" && current.openInput){
+    userAnswer = current.openInput.value.trim() || "—";
+  }
   if(ok)session.score++;
-  session.results.push({q, ok});
+  session.results.push({q, ok, userAnswer});
   document.getElementById("qScore").textContent=`Wynik: ${session.score}`;
   // zapis bledow
   let errs=getErrors();
@@ -508,11 +577,8 @@ function finishQuestion(ok){
   const ver=document.getElementById("verdict");
   ver.className="verdict "+(ok?"ok":"bad");
   ver.textContent = ok ? "✓ Dobrze!" : "✕ Niepoprawnie";
-  // wyjasnienie (dla MC)
-  if(q.type==="mc" && q.explanation){
-    document.getElementById("explain").classList.add("show");
-    document.getElementById("explainBody").textContent=q.explanation;
-  }
+  // wyjasnienie — zawsze we wszystkich trybach
+  showExplanationPanel(q, q.type === "open");
   // przycisk dalej
   const actEl=document.getElementById("actions"); actEl.innerHTML="";
   const next=document.createElement("button"); next.className="btn btn-primary";
@@ -548,19 +614,23 @@ function showResults(){
   document.getElementById("resTitle").textContent=title;
   document.getElementById("resMsg").textContent=msg;
   document.getElementById("retryErrBtn").style.display = getErrors().length? "" : "none";
-  // przeglad
+  // przegląd: pytanie → twoja odpowiedź → poprawna → wyjaśnienie
   const rev=document.getElementById("review"); rev.innerHTML="";
   session.results.forEach((r,i)=>{
-    const d=document.createElement("div"); d.className="rev "+(r.ok?"ok":"bad");
-    d.innerHTML=`<div class="dot"></div><div><b>${i+1}.</b> ${r.q.question.slice(0,90)}${r.q.question.length>90?'…':''}</div>`;
-    d.onclick=()=>showReview(r.q,r.ok);
-    rev.appendChild(d);
+    const card=document.createElement("div");
+    card.className="rev-card "+(r.ok?"ok":"bad");
+    card.innerHTML=`
+      <div class="rev-head">${r.ok?"✓":"✕"} Pytanie ${i+1}</div>
+      <h4>Pytanie</h4>
+      <div class="qtext">${escapeHtml(r.q.question)}</div>
+      <h4>Twoja odpowiedź</h4>
+      <div class="block user">${escapeHtml(r.userAnswer||"—")}</div>
+      <h4>Poprawna odpowiedź</h4>
+      <div class="block correct">${escapeHtml(formatCorrectAnswer(r.q))}</div>
+      <h4>Wyjaśnienie</h4>
+      <div class="block expl">${escapeHtml(formatExplanationOnly(r.q))}</div>`;
+    rev.appendChild(card);
   });
-}
-function showReview(q,ok){
-  const ans = q.type==="mc" ? ("Poprawne: "+q.correct.join("  •  ")) : "";
-  const txt = `${q.question}\n\n${ans}${ans?"\n\n":""}${q.explanation||""}`;
-  alert(txt);
 }
 
 function exitQuiz(){ if(confirm("Zakończyć i wrócić do strony głównej?")) location.reload(); }
