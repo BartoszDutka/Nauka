@@ -1,0 +1,19 @@
+PRO-MAX TEST 1: brakuje numerów pytań: [4, 5] (mamy: [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23])
+PRO-MAX #1 id=22: odpowiedź o 'pthread' w pytaniu bez tego tematu — Jakiego mechanizmu używamy w POSIX Threads do zabezpieczania
+PRO-MAX #5 id=26: odpowiedź o 'pthread' w pytaniu bez tego tematu — Które stwierdzenia dotyczące POSIX Threads i zmiennych warun
+PRO-MAX #5 id=26: odpowiedź o 'pthread' w pytaniu bez tego tematu — Które stwierdzenia dotyczące POSIX Threads i zmiennych warun
+PRO-MAX #5 id=26: odpowiedź o 'pthread' w pytaniu bez tego tematu — Które stwierdzenia dotyczące POSIX Threads i zmiennych warun
+PRO-MAX #5 id=26: odpowiedź o 'pthread' w pytaniu bez tego tematu — Które stwierdzenia dotyczące POSIX Threads i zmiennych warun
+PRO-MAX #5 id=26: odpowiedź o 'pthread' w pytaniu bez tego tematu — Które stwierdzenia dotyczące POSIX Threads i zmiennych warun
+PRO-MAX #2 id=43: odpowiedź o 'SIMD' w pytaniu bez tego tematu — Do modeli przetwarzania według taksonomii Flynna należą:
+PRO-MAX #11 id=52: odpowiedź o 'pthread' w pytaniu bez tego tematu — Interkomunikatory w MPI służą do:
+PW: sparsowano 86 pytań, numery: 1-92
+Duplikat treści: id 9 i 51 (PRO-MAX #10)
+Duplikat treści: id 18 i 52 (PRO-MAX #11)
+Duplikat treści: id 65 i 74 (PW #19)
+Duplikat treści: id 66 i 75 (PW #20)
+Duplikat treści: id 73 i 77 (PW #22)
+Duplikat treści: id 65 i 106 (PW #62)
+Duplikat treści: id 108 i 109 (PW #65)
+Duplikat treści: id 107 i 110 (PW #66)
+Duplikat treści: id 116 i 117 (PW #73)

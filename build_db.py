@@ -1,11 +1,35 @@
 # -*- coding: utf-8 -*-
 """Laczy bazy z Nauka-PRO-MAX i PW w jeden plik questions.js."""
 import json
+import re
 
 with open("questions.json", encoding="utf-8") as f:
-    nauka = json.load(f)
+    nauka_raw = json.load(f)
 with open("questions_pw.json", encoding="utf-8") as f:
     pw = json.load(f)
+
+
+def norm_key(text):
+    return re.sub(r"\s+", " ", text).strip().lower()[:120]
+
+
+def richness(q):
+    return (
+        len(q["correct"]) * 10
+        + len(q.get("wrong", []))
+        + len(q.get("explanation", "")) / 500
+    )
+
+
+# PRO-MAX: ten sam tekst pytania w roznych TESTach (np. MPI-IO w TEST 1 i 3)
+deduped = {}
+for q in nauka_raw:
+    key = norm_key(q["question"])
+    if key not in deduped or richness(q) > richness(deduped[key]):
+        deduped[key] = q
+nauka = list(deduped.values())
+# zachowaj kolejnosc id z oryginalnego pliku
+nauka.sort(key=lambda x: x["id"])
 
 merged = []
 for q in nauka:
@@ -39,6 +63,8 @@ for q in pw:
 
 unc = [q for q in merged if q["uncertain"] or q["uncertainOpen"]]
 print(f"  Pytan z odpowiedziami niepewnymi (zolte): {len(unc)}")
+if len(nauka) < len(nauka_raw):
+    print(f"  PRO-MAX: pominietych duplikatow tresci: {len(nauka_raw) - len(nauka)}")
 
 mc = [q for q in merged if q["type"] == "mc"]
 op = [q for q in merged if q["type"] == "open"]
