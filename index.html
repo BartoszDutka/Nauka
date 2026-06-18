@@ -93,7 +93,14 @@
   .opt .unc{display:inline-block;font-size:11px;font-weight:700;color:#92400e;background:#fde68a;
     border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle}
 
-  .qtext{font-size:19px;font-weight:600;line-height:1.5;margin-bottom:18px;white-space:pre-wrap}
+  .qtext{font-size:19px;font-weight:600;line-height:1.5;margin-bottom:18px}
+  .qtext .prose{font-weight:600;font-size:19px;margin-bottom:8px}
+  .rich .prose{font-size:14px;font-weight:400;line-height:1.55;margin-bottom:8px;color:#334155}
+  .code-block{background:#1e293b;color:#e2e8f0;padding:14px 16px;border-radius:10px;
+    font-family:Consolas,'Cascadia Mono','Courier New',monospace;font-size:13px;line-height:1.55;
+    overflow-x:auto;margin:10px 0;white-space:pre;font-weight:400;border:1px solid #334155}
+  .code-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);
+    letter-spacing:.5px;margin:12px 0 4px}
 
   .options{display:grid;gap:10px}
   .opt{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:13px;
@@ -126,7 +133,7 @@
     padding:14px 16px;display:none}
   .explain.show{display:block;animation:fade .3s}
   .explain h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--primary-d)}
-  .explain .body{font-size:14px;line-height:1.55;white-space:pre-wrap;color:#334155;max-height:340px;overflow:auto}
+  .explain .body{font-size:14px;line-height:1.55;color:#334155;max-height:340px;overflow:auto}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
 
   .verdict{font-weight:700;font-size:15px;margin-top:16px;padding:10px 14px;border-radius:10px}
@@ -146,8 +153,8 @@
   .rev-card .rev-head{font-weight:700;font-size:15px;margin-bottom:12px}
   .rev-card h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.6px;font-weight:700}
   .rev-card h4:first-of-type{margin-top:0}
-  .rev-card .qtext{font-size:16px;font-weight:600;line-height:1.5;white-space:pre-wrap;color:var(--ink)}
-  .rev-card .block{font-size:14px;line-height:1.55;white-space:pre-wrap;padding:10px 12px;border-radius:10px}
+  .rev-card .qtext{font-size:16px;font-weight:600;line-height:1.5;color:var(--ink)}
+  .rev-card .block{font-size:14px;line-height:1.55;padding:10px 12px;border-radius:10px}
   .rev-card .block.user{background:#f8fafc;border:1px solid var(--line)}
   .rev-card .block.correct{background:var(--green-l);color:#166534}
   .rev-card .block.expl{background:#f8faff;border-left:3px solid var(--primary);border-radius:0 10px 10px 0}
@@ -291,6 +298,119 @@ function escapeHtml(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+function isCodeLine(line){
+  const t = line.trim();
+  if(!t) return false;
+  return /^#pragma\b/.test(t) ||
+    /^for\s*\(/.test(t) ||
+    /^while\s*\(/.test(t) ||
+    /^if\s*\(/.test(t) ||
+    /^(int|void|double|float|char|long|unsigned)\s+\w/.test(t) ||
+    /^MPI_\w+/.test(t) ||
+    /^pthread_/.test(t) ||
+    /^P\d+\s*\(rank/.test(t) ||
+    /^W\d+:\s/.test(t) ||
+    /^[{}]\s*$/.test(t) ||
+    (/^[A-Za-z_][\w\s\[\]]*\s*=\s*.+;/.test(t) && /[;{}]/.test(t));
+}
+
+function prettifyCode(code){
+  let s = code.trim().replace(/\s+/g, " ");
+  if(!s) return "";
+  if(s.includes("\n")) return s.replace(/\r\n/g, "\n").trim();
+  s = s.replace(/\s*;\s*/g, ";\n");
+  s = s.replace(/\s*\{\s*/g, " {\n");
+  s = s.replace(/\}\s*/g, "\n}\n");
+  s = s.replace(/#pragma\s+/g, "\n#pragma ");
+  s = s.replace(/\b(for|while|if)\s*\(/g, "\n$1 (");
+  const lines = s.split("\n").map(l => l.trim()).filter(Boolean);
+  let indent = 0;
+  const out = [];
+  for(const line of lines){
+    if(line.startsWith("}")) indent = Math.max(0, indent - 1);
+    out.push("  ".repeat(indent) + line);
+    if(line.endsWith("{")) indent++;
+  }
+  return out.join("\n");
+}
+
+function wrapCode(code){
+  const pretty = prettifyCode(code);
+  if(!pretty) return "";
+  return `<pre class="code-block"><code>${escapeHtml(pretty)}</code></pre>`;
+}
+
+function wrapProse(text, bold){
+  const t = text.trim();
+  if(!t) return "";
+  const cls = bold ? "prose" : "prose";
+  return `<div class="${cls}">${escapeHtml(t).replace(/\n/g, "<br>")}</div>`;
+}
+
+function splitCodeTail(text){
+  const m = text.match(/\s+(powoduje|Jest:|zilustruj|w stan:|Odpowiedź|Zależności|WAW|WAR|RAW|nr linii)\b/i);
+  if(m && m.index > 8){
+    const code = text.slice(0, m.index).trim();
+    const prose = text.slice(m.index).trim();
+    if(isCodeLine(code.split(/\s+/).slice(0,3).join(" ")) || /#pragma|for\s*\(|int\s+\w|MPI_|pthread_/.test(code)){
+      return {code, prose};
+    }
+  }
+  return {code: text.trim(), prose: ""};
+}
+
+function formatLinesBlock(text, boldProse){
+  text = text.replace(/\r\n/g, "\n").trim();
+  if(!text) return "";
+  if(!text.includes("\n") && (text.includes("Kod:") || text.includes("Kod z obrazka:") || /#pragma|for\s*\(/.test(text))){
+    const km = text.match(/^(.*?)(?:Kod z obrazka:|Kod:)\s*(.+)$/is);
+    if(km){
+      let html = wrapProse(km[1], boldProse);
+      const split = splitCodeTail(km[2]);
+      html += `<div class="code-label">Kod</div>` + wrapCode(split.code);
+      if(split.prose) html += wrapProse(split.prose, boldProse);
+      return html;
+    }
+    const pm = text.match(/^(.*?)(#pragma[\s\S]+)$/i);
+    if(pm){
+      const split = splitCodeTail(pm[2]);
+      return wrapProse(pm[1], boldProse) + wrapCode(split.code) + (split.prose ? wrapProse(split.prose, boldProse) : "");
+    }
+    const fm = text.match(/^(.*?)(for\s*\([^)]+\)\s*\{[\s\S]+)$/i);
+    if(fm){
+      const split = splitCodeTail(fm[2]);
+      return wrapProse(fm[1], boldProse) + wrapCode(split.code) + (split.prose ? wrapProse(split.prose, boldProse) : "");
+    }
+  }
+  let html = "";
+  let codeBuf = [];
+  const lines = text.split("\n");
+  for(const line of lines){
+    const trimmed = line.trim();
+    if(!trimmed){
+      if(codeBuf.length){ html += wrapCode(codeBuf.join("\n")); codeBuf = []; }
+      continue;
+    }
+    if(isCodeLine(trimmed) || (codeBuf.length && /^[}\s;]*$/.test(trimmed) || /^\w+\s*[+=]/.test(trimmed))){
+      codeBuf.push(trimmed);
+    }else{
+      if(codeBuf.length){ html += wrapCode(codeBuf.join("\n")); codeBuf = []; }
+      html += wrapProse(trimmed, boldProse);
+    }
+  }
+  if(codeBuf.length) html += wrapCode(codeBuf.join("\n"));
+  return html;
+}
+
+function formatRichHtml(text, boldProse){
+  if(!text) return "";
+  return `<div class="rich">${formatLinesBlock(text, boldProse)}</div>`;
+}
+
+function setFormattedHtml(el, text, boldProse){
+  el.innerHTML = formatRichHtml(text, boldProse);
+}
+
 /** Poprawna odpowiedź (tekst). */
 function formatCorrectAnswer(q){
   if(q.type === "open"){
@@ -342,7 +462,7 @@ function showExplanationPanel(q, openStyle){
   exp.querySelector("h4").textContent = openStyle
     ? "✅ Poprawna odpowiedź / wyjaśnienie"
     : "💡 Wyjaśnienie";
-  document.getElementById("explainBody").textContent = formatExplanation(q);
+  document.getElementById("explainBody").innerHTML = formatRichHtml(formatExplanation(q), false);
 }
 
 function getErrors(){try{return JSON.parse(localStorage.getItem(LS_ERR)||"[]");}catch(e){return [];}}
@@ -440,7 +560,7 @@ function renderQuestion(){
   const hasUnc = (q.uncertain&&q.uncertain.length) || q.uncertainOpen;
   if(hasUnc) badges.push(`<span class="badge warn">⚠ NIEPEWNE</span>`);
   document.getElementById("badges").innerHTML = badges.join("");
-  document.getElementById("qText").textContent = q.question;
+  setFormattedHtml(document.getElementById("qText"), q.question, true);
   // reset paneli
   const exp=document.getElementById("explain"); exp.classList.remove("show");
   exp.querySelector("h4").textContent="💡 Wyjaśnienie";
@@ -617,13 +737,13 @@ function showResults(){
     card.innerHTML=`
       <div class="rev-head">${r.ok?"✓":"✕"} Pytanie ${i+1}</div>
       <h4>Pytanie</h4>
-      <div class="qtext">${escapeHtml(r.q.question)}</div>
+      <div class="qtext">${formatRichHtml(r.q.question, true)}</div>
       <h4>Twoja odpowiedź</h4>
-      <div class="block user">${escapeHtml(r.userAnswer||"—")}</div>
+      <div class="block user rich">${formatLinesBlock(r.userAnswer||"—", false)}</div>
       <h4>Poprawna odpowiedź</h4>
-      <div class="block correct">${escapeHtml(formatCorrectAnswer(r.q))}</div>
+      <div class="block correct rich">${formatLinesBlock(formatCorrectAnswer(r.q), false)}</div>
       <h4>Wyjaśnienie</h4>
-      <div class="block expl">${escapeHtml(formatExplanationOnly(r.q))}</div>`;
+      <div class="block expl rich">${formatRichHtml(formatExplanationOnly(r.q), false)}</div>`;
     rev.appendChild(card);
   });
 }
