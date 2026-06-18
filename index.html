@@ -200,6 +200,11 @@
         <div><h3>Tryb losowy</h3>
           <p>Pytania losowane bez końca — nauka na spokojnie.</p></div>
       </button>
+      <button class="mode" onclick="startInstant()">
+        <div class="ic">⚡</div>
+        <div><h3>Jedno losowe pytanie</h3>
+          <p>Odpowiadasz, a po sprawdzeniu widzisz poprawną odpowiedź i wyjaśnienie. Potem losujesz kolejne.</p></div>
+      </button>
       <button class="mode" onclick="startAll()">
         <div class="ic">📚</div>
         <div><h3>Przerabianie po kolei</h3>
@@ -329,15 +334,41 @@ function startErrors(){
 function retryErrors(){const ids=getErrors(); const list=QUESTIONS.filter(q=>ids.includes(q.id));
   if(!list.length){alert("Brak błędów do powtórki — brawo!");return;} begin(shuffle(list),true);}
 
+/* ===== tryb: jedno losowe pytanie (odpowiadasz, potem widzisz wynik) ===== */
+function startInstant(){
+  readSettings();
+  const p=pool();
+  if(!p.length){alert("Brak pytań dla wybranych ustawień.");return;}
+  session={list:[p[Math.floor(Math.random()*p.length)]], pos:0, score:0, results:[], scored:false, instant:true};
+  document.getElementById("home").classList.add("hide");
+  document.getElementById("results").classList.add("hide");
+  document.getElementById("quiz").classList.remove("hide");
+  renderQuestion();
+}
+function nextInstant(){
+  const p=pool();
+  session.list=[p[Math.floor(Math.random()*p.length)]];
+  session.pos=0;
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 /* ================= Render pytania ================= */
 let current=null; // {q, opts, isMulti, answered}
 function renderQuestion(){
   const q = session.list[session.pos];
   current = {q, answered:false};
   // pasek
-  document.getElementById("qMeta").textContent = `Pytanie ${session.pos+1} / ${session.list.length}`;
-  document.getElementById("qScore").textContent = `Wynik: ${session.score}`;
-  document.getElementById("progBar").style.width = (session.pos/session.list.length*100)+"%";
+  const sc=document.getElementById("qScore");
+  if(session.instant){
+    document.getElementById("qMeta").textContent = "⚡ Losowe pytanie";
+    sc.style.display="none";
+    document.getElementById("progBar").style.width = "0%";
+  }else{
+    document.getElementById("qMeta").textContent = `Pytanie ${session.pos+1} / ${session.list.length}`;
+    sc.style.display=""; sc.textContent=`Wynik: ${session.score}`;
+    document.getElementById("progBar").style.width = (session.pos/session.list.length*100)+"%";
+  }
   // badges
   const badges=[];
   badges.push(`<span class="badge src ${q.source==='PW'?'pw':''}">${q.source}${q.source_num?` · #${q.source_num}`:''}</span>`);
@@ -485,10 +516,18 @@ function finishQuestion(ok){
   // przycisk dalej
   const actEl=document.getElementById("actions"); actEl.innerHTML="";
   const next=document.createElement("button"); next.className="btn btn-primary";
-  const last = session.pos>=session.list.length-1;
-  next.textContent = last ? "Zobacz wynik →" : "Następne pytanie →";
-  next.onclick=()=>{ if(last)showResults(); else {session.pos++;renderQuestion();window.scrollTo({top:0,behavior:'smooth'});} };
-  actEl.appendChild(next);
+  if(session.instant){
+    next.textContent="🎲 Następne losowe pytanie";
+    next.onclick=nextInstant;
+    const home=document.createElement("button"); home.className="btn btn-sec";
+    home.textContent="🏠 Strona główna"; home.onclick=()=>location.reload();
+    actEl.appendChild(next); actEl.appendChild(home);
+  }else{
+    const last = session.pos>=session.list.length-1;
+    next.textContent = last ? "Zobacz wynik →" : "Następne pytanie →";
+    next.onclick=()=>{ if(last)showResults(); else {session.pos++;renderQuestion();window.scrollTo({top:0,behavior:'smooth'});} };
+    actEl.appendChild(next);
+  }
 }
 
 /* ================= Wyniki ================= */
