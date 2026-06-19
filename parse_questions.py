@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Parser Nauka-PRO-MAX z pliku DOCX (ujednolicony format pytan i odpowiedzi).
-Wyjasnienia (Pojecia do notatki / intuicja) uzupelnia z nauka_promax.txt.
+Parser Nauka-PRO-MAX z pliku NaukaFix.docx.
+Format: zmienne_odpowiedzi, poprawne/niepoprawne, odpowiedz_koncowa,
+omowienie_pojec_i_duze_wyjasnienia (osobno od odpowiedzi).
 """
 import json
 import re
@@ -9,32 +10,26 @@ import unicodedata
 import zipfile
 import xml.etree.ElementTree as ET
 
-DOCX = "Nauka-PRO-MAX_ujednolicone_pytania_odpowiedzi.docx"
-PDF_TXT = "nauka_promax.txt"
+DOCX = "NaukaFix.docx"
 W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 
 RE_TEST = re.compile(r"^Test\s+(\d+)\s*$", re.I)
 RE_PYT = re.compile(r"^Pytanie\s+(\d+)\s*:\s*(.*)$")
-RE_PYT_BARE = re.compile(r"^Pytanie\s*:\s*(.*)$")
-RE_PYT_ALT = re.compile(r"^(\d{1,2})\.([A-ZĄĆĘŁŃÓŚŹŻ].*)$")
-RE_CORRECT = re.compile(r"^Poprawne odpowiedzi:", re.I)
-RE_WRONG = re.compile(r"^Niepoprawne odpowiedzi:", re.I)
-RE_FINAL = re.compile(r"^Odpowiedź końcowa", re.I)
-RE_CODE_HDR = re.compile(r"^Treść / kod / warianty:", re.I)
 RE_OPT_MARK = re.compile(r"^([a-zA-Z])[\)\.]\s+(.*)$")
-RE_SKIP_WRONG = re.compile(r"^Nie podano wprost", re.I)
-RE_NOTE = re.compile(r"^Poj\u0119ci[ae] do notatki", re.I)
-RE_INTU = re.compile(r"^Najwa\u017cniejsza intuicja", re.I)
-RE_OTHER = re.compile(r"^(W szerszym sensie|Mniej|Cz\u0119\u015bciowo|Dodatkowo|Uwaga)", re.I)
-RE_PDF_CORRECT = re.compile(
-    r"^((Najbardziej\s+)?Poprawn[ae]\s+odpowied|Z\s+obrazu\s+wida\u0107\s+odpowied)",
-    re.IGNORECASE,
-)
-RE_PDF_WRONG = re.compile(
-    r"^(Niepoprawn|Raczej|B\u0142\u0119dn|Dlaczego|Pozosta\u0142e odpowiedzi)",
-    re.IGNORECASE,
-)
-BULLET = "\u2022"
+RE_OPEN_ANSWER = re.compile(r"^\d+\s*→|^zależności wyjścia|^[a-z]\s*=", re.I)
+RE_CODE_HDR = re.compile(r"^treść\s*/\s*kod", re.I)
+
+SECTION_MARKERS = frozenset({
+    "zmienne_odpowiedzi",
+    "poprawne_odpowiedzi",
+    "niepoprawne_odpowiedzi",
+    "odpowiedz_koncowa",
+    "omowienie_pojec_i_duze_wyjasnienia",
+    "odpowiedz",
+    "poprawna",
+    "wyjasnienie",
+})
+
 OPEN_PATTERNS = (
     "wypisz zależności",
     "jakie będą wartości zmiennych",
@@ -52,15 +47,27 @@ def clean(x):
 
 
 def strip_letter(x):
-    return re.sub(r"^[a-zA-Z][\)\.]\s+", "", x).strip()
+    m = RE_OPT_MARK.match(x.strip())
+    return m.group(2).strip() if m else x.strip()
 
 
-def is_bullet(line):
-    return line.lstrip().startswith(BULLET)
+def is_section_marker(line):
+    return line.lower() in SECTION_MARKERS
 
 
-def bullet_text(line):
-    return line.lstrip()[len(BULLET):].strip()
+def is_bool_line(line):
+    return line.lower() in ("true", "false")
+
+
+def is_new_option(line):
+    s = line.strip()
+    if not s or is_section_marker(s) or is_bool_line(s):
+        return False
+    if RE_OPT_MARK.match(s):
+        return True
+    if RE_OPEN_ANSWER.match(s):
+        return True
+    return False
 
 
 def is_open_question(text):
@@ -77,16 +84,16 @@ def split_assignments(text):
     return out if len(out) > 1 else [text.strip()]
 
 
-def parse_option_line(line):
-    s = line.strip()
-    if not s or RE_SKIP_WRONG.match(s):
-        return []
-    m = RE_OPT_MARK.match(s)
-    if m:
-        return [m.group(2).strip()]
-    if is_bullet(line):
-        return [strip_letter(bullet_text(line))]
-    return split_assignments(s)
+def parse_answer_list(lines):
+    out = []
+    for line in lines:
+        s = line.strip()
+        if not s or s == "—":
+            continue
+        text = strip_letter(s)
+        if text:
+            out.append(text)
+    return out
 
 
 def dedup(seq):
@@ -120,92 +127,158 @@ def extract_docx_paragraphs(path):
 def parse_docx(path):
     paras = extract_docx_paragraphs(path)
     current_test = None
-    last_num = 0
     section = None
     q = None
     raw = []
 
-    for line in paras:
-        if line.startswith("Nauka-PRO-MAX") or "Format każdego pytania" in line:
+    def flush():
+        nonlocal q
+        if q:
+            raw.append(q)
+            q = None
+
+    i = 0
+    while i < len(paras):
+        line = paras[i]
+
+        if line.startswith("Nauka-PRO-MAX") or "Każda opcja z testu" in line:
+            i += 1
             continue
 
         mt = RE_TEST.match(line)
         if mt:
+            flush()
             current_test = int(mt.group(1))
-            last_num = 0
+            section = None
+            i += 1
             continue
 
         mp = RE_PYT.match(line)
         if mp:
-            if q:
-                raw.append(q)
-            last_num = int(mp.group(1))
+            flush()
             q = {
                 "test": current_test,
-                "source_num": last_num,
+                "source_num": int(mp.group(1)),
                 "question_parts": [mp.group(2).strip()],
-                "correct": [],
-                "wrong": [],
+                "correct_lines": [],
+                "wrong_lines": [],
+                "explanation_lines": [],
             }
             section = "question"
-            continue
-
-        mb = RE_PYT_BARE.match(line)
-        if mb:
-            if q:
-                raw.append(q)
-            last_num += 1
-            q = {
-                "test": current_test,
-                "source_num": last_num,
-                "question_parts": [mb.group(1).strip()],
-                "correct": [],
-                "wrong": [],
-            }
-            section = "question"
+            i += 1
             continue
 
         if q is None:
+            i += 1
             continue
 
-        if RE_CORRECT.match(line):
+        low = line.lower()
+
+        if low == "zmienne_odpowiedzi":
+            section = "options_skip"
+            i += 1
+            # pomin naglowki kolumn
+            while i < len(paras) and paras[i].lower() in ("odpowiedz", "poprawna", "wyjasnienie"):
+                i += 1
+            section = "options"
+            continue
+
+        if low == "poprawne_odpowiedzi":
             section = "correct"
+            i += 1
             continue
-        if RE_WRONG.match(line):
+
+        if low == "niepoprawne_odpowiedzi":
             section = "wrong"
+            i += 1
             continue
-        if RE_FINAL.match(line):
+
+        if low == "odpowiedz_koncowa":
             section = "final"
+            i += 1
+            continue
+
+        if low == "omowienie_pojec_i_duze_wyjasnienia":
+            section = "explanation"
+            i += 1
             continue
 
         if section == "question":
             if RE_CODE_HDR.match(line):
                 q["question_parts"].append("\n" + line)
-            else:
+            elif not is_section_marker(line):
                 q["question_parts"].append(line)
-        elif section == "correct":
-            q["correct"].extend(parse_option_line(line))
-        elif section == "wrong":
-            q["wrong"].extend(parse_option_line(line))
+            i += 1
+            continue
 
-    if q:
-        raw.append(q)
+        if section == "options":
+            if not is_new_option(line):
+                i += 1
+                continue
+            # odpowiedz
+            i += 1
+            if i >= len(paras) or not is_bool_line(paras[i]):
+                continue
+            is_correct = paras[i].lower() == "true"
+            i += 1
+            if not is_correct and i < len(paras):
+                nxt = paras[i]
+                if not is_bool_line(nxt) and not is_section_marker(nxt) and not is_new_option(nxt):
+                    i += 1  # krotkie wyjasnienie opcji — juz w niepoprawne_odpowiedzi
+            continue
+
+        if section == "correct":
+            if is_section_marker(line):
+                continue
+            q["correct_lines"].append(line)
+            i += 1
+            continue
+
+        if section == "wrong":
+            if is_section_marker(line):
+                continue
+            if line.strip() != "—":
+                q["wrong_lines"].append(line)
+            i += 1
+            continue
+
+        if section == "final":
+            i += 1
+            continue
+
+        if section == "explanation":
+            if RE_PYT.match(line) or RE_TEST.match(line):
+                flush()
+                continue
+            q["explanation_lines"].append(line)
+            i += 1
+            continue
+
+        i += 1
+
+    flush()
 
     questions = []
     for item in raw:
         question_text = clean(" ".join(item["question_parts"]))
         question_text = re.sub(r"\s*\n\s*", "\n", question_text)
 
-        correct = dedup([clean(c) for c in item["correct"] if clean(c)])
-        wrong = dedup([clean(w) for w in item["wrong"] if clean(w)])
+        correct = parse_answer_list(item["correct_lines"])
+        wrong = parse_answer_list(item["wrong_lines"])
+
+        if len(correct) == 1 and is_open_question(question_text):
+            correct = split_assignments(correct[0])
+
+        correct = dedup([clean(c) for c in correct if clean(c)])
+        wrong = dedup([clean(w) for w in wrong if clean(w)])
         cl = {c.lower() for c in correct}
         wrong = [w for w in wrong if w.lower() not in cl]
 
+        explanation = "\n".join(item["explanation_lines"]).strip()
         qtype = "open" if is_open_question(question_text) else "mc"
 
-        explanation = ""
-        if qtype == "open" and correct:
-            explanation = "Odpowiedź:\n" + "\n".join(correct)
+        if qtype == "open" and correct and not explanation.startswith("Odpowiedź:"):
+            explanation = ("Odpowiedź:\n" + "\n".join(correct) + ("\n\n" + explanation if explanation else "")).strip()
 
         questions.append({
             "test": item["test"],
@@ -220,114 +293,8 @@ def parse_docx(path):
     return questions
 
 
-def extract_pdf_explanations(path):
-    with open(path, encoding="utf-8") as f:
-        raw = f.read()
-    raw = re.sub(r"\n?===== PAGE \d+ =====\n?", "\n", raw)
-    lines = [l.rstrip() for l in raw.split("\n")]
-
-    markers = []
-    current_test = None
-    last_qnum = 0
-    for i, l in enumerate(lines):
-        mt = RE_TEST.match(l.strip())
-        if mt:
-            current_test = int(mt.group(1))
-            last_qnum = 0
-            continue
-        mp = RE_PYT.match(l.strip())
-        if mp:
-            last_qnum = int(mp.group(1))
-            markers.append((i, last_qnum, current_test))
-            continue
-        mb = RE_PYT_BARE.match(l.strip())
-        if mb:
-            last_qnum += 1
-            markers.append((i, last_qnum, current_test))
-            continue
-        ma = RE_PYT_ALT.match(l.strip())
-        if ma and current_test is not None:
-            num = int(ma.group(1))
-            if num == last_qnum + 1:
-                last_qnum = num
-                markers.append((i, num, current_test))
-
-    explanations = {}
-    for idx, (start, qnum, test_no) in enumerate(markers):
-        end = markers[idx + 1][0] if idx + 1 < len(markers) else len(lines)
-        block = lines[start:end]
-
-        section = "question"
-        note_lines = []
-        intu_lines = []
-
-        for j, l in enumerate(block):
-            if j == 0:
-                continue
-            s = l.strip()
-            if not s:
-                continue
-            if RE_PDF_CORRECT.match(s):
-                if section in ("note", "intu"):
-                    note_lines.append(s)
-                section = "correct"
-                continue
-            if RE_PDF_WRONG.match(s):
-                if section in ("note", "intu"):
-                    note_lines.append(s)
-                section = "wrong"
-                continue
-            if RE_NOTE.match(s):
-                section = "note"
-                continue
-            if RE_INTU.match(s):
-                section = "intu"
-                intu_lines.append("Najważniejsza intuicja:")
-                continue
-            if section in ("correct", "wrong") and RE_OTHER.match(s):
-                section = "other"
-                continue
-            if section in ("correct", "wrong") and (not is_bullet(l)) and s.endswith(":"):
-                section = "other"
-                continue
-
-            if section == "note":
-                note_lines.append(s)
-            elif section == "intu":
-                intu_lines.append(s)
-            elif section == "other":
-                note_lines.append(s)
-
-        parts = []
-        note_text = "\n".join(note_lines).strip()
-        if note_text:
-            parts.append(note_text)
-        intu_text = "\n".join(intu_lines).strip()
-        if intu_text:
-            parts.append(intu_text)
-        if parts:
-            explanations[(test_no, qnum)] = "\n\n".join(parts).strip()
-
-    return explanations
-
-
-def merge_explanations(questions, pdf_expl):
-    for q in questions:
-        key = (q.get("test"), q.get("source_num"))
-        extra = pdf_expl.get(key, "").strip()
-        if not extra:
-            continue
-        if q["type"] == "open":
-            base = q.get("explanation", "").strip()
-            q["explanation"] = norm((base + "\n\n" + extra).strip())
-        else:
-            q["explanation"] = norm(extra)
-
-
 def main():
     questions = parse_docx(DOCX)
-    pdf_expl = extract_pdf_explanations(PDF_TXT)
-    merge_explanations(questions, pdf_expl)
 
     for i, q in enumerate(questions, 1):
         q["id"] = i
@@ -338,7 +305,7 @@ def main():
 
     print(f"Zrodlo: {DOCX}")
     print(f"Razem pytan: {len(questions)} | MC: {len(mc)} | otwarte: {len(op)} -> {[q['id'] for q in op]}")
-    print(f"Z wyjasnieniem z PDF: {len(with_expl)}")
+    print(f"Z wyjasnieniem: {len(with_expl)}")
     print(f"MC bez blednych opcji: {len([q for q in mc if not q['wrong']])}")
     print(f"MC z wieloma poprawnymi: {len([q for q in mc if len(q['correct']) > 1])}")
 
@@ -346,7 +313,7 @@ def main():
         json.dump(questions, f, ensure_ascii=False, indent=2)
 
     with open("questions.js", "w", encoding="utf-8") as f:
-        f.write("// Auto-generowana baza pytan z Nauka-PRO-MAX (DOCX + wyjasnienia PDF)\n")
+        f.write("// Auto-generowana baza pytan z NaukaFix.docx\n")
         f.write("const QUESTIONS = ")
         json.dump(questions, f, ensure_ascii=False, indent=2)
         f.write(";\n")
