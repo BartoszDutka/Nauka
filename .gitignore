@@ -1,0 +1,21 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Xcode build and user data
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
